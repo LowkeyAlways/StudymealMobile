@@ -1,0 +1,79 @@
+{
+  "issues": [
+    {
+      "key": "m0",
+      "title": "Epic: M0 — Fondations produit",
+      "labels": ["epic", "area: mobile", "priority: p1", "status: ready", "size: l"],
+      "body": "## Objectif\n\nÉtablir le socle technique et produit de Studymeal afin de livrer un premier parcours mobile fiable.\n\n## Résultat attendu\n\nUne application Expo/TypeScript structurée, contrôlée automatiquement et prête à recevoir les données puis la carte.\n\n## Critères d’acceptation\n\n- [ ] Les sous-issues de cette épique sont terminées ou explicitement replanifiées.\n- [ ] Le contrôle qualité passe sur chaque pull request.\n- [ ] La configuration de secrets reste hors du dépôt.\n\n## Relations\n\nCette épique regroupe les fondations nécessaires à la carte du pilote Paris Rive Gauche."
+    },
+    {
+      "key": "m0-identity",
+      "title": "Configurer l’identité native Studymeal",
+      "labels": ["type: chore", "area: mobile", "priority: p1", "status: ready", "size: s"],
+      "body": "## Objectif\n\nConfigurer le nom, le schéma de lien profond, les métadonnées et les icônes natives de Studymeal.\n\n## Critères d’acceptation\n\n- [ ] Le nom affiché est `Studymeal`.\n- [ ] Le schéma `studymeal://` est configuré.\n- [ ] Les métadonnées iOS et Android sont cohérentes.\n- [ ] Les éléments de marque sont documentés."
+    },
+    {
+      "key": "m0-navigation",
+      "title": "Créer la navigation d’accueil et la structure d’écrans",
+      "labels": ["type: feature", "area: mobile", "priority: p1", "status: ready", "size: s"],
+      "body": "## Objectif\n\nPoser une navigation Expo Router lisible et extensible pour l’accueil, la carte, le détail d’un lieu et les favoris.\n\n## Critères d’acceptation\n\n- [ ] La structure de routes est documentée.\n- [ ] L’accueil est le point d’entrée par défaut.\n- [ ] Les écrans à venir peuvent être ajoutés sans refonte de la navigation.\n- [ ] L’application se lance sur iOS et Android."
+    },
+    {
+      "key": "m0-quality",
+      "title": "Installer le contrôle qualité Docker et GitHub Actions",
+      "labels": ["type: chore", "area: ci", "priority: p1", "status: ready", "size: s"],
+      "body": "## Objectif\n\nRendre les vérifications TypeScript, lint et Docker systématiques avant intégration du code.\n\n## Critères d’acceptation\n\n- [ ] `npm run quality` exécute le type-check et le lint.\n- [ ] Une pull request lance les contrôles GitHub Actions.\n- [ ] L’image Docker de qualité construit et exécute ces contrôles.\n- [ ] Les instructions de lancement sont présentes dans le README."
+    },
+    {
+      "key": "m0-sentry",
+      "title": "Connecter Sentry et valider la remontée d’une erreur de test",
+      "labels": ["type: feature", "area: observability", "priority: p1", "status: blocked", "size: s"],
+      "body": "## Objectif\n\nInstaller Sentry pour surveiller les erreurs de l’application mobile sans exposer de secrets dans Git.\n\n## Blocage\n\nLa création du projet Sentry `studymeal-mobile` et la remise de son DSN sont nécessaires avant intégration.\n\n## Critères d’acceptation\n\n- [ ] Le DSN est lu depuis la configuration locale ou sécurisée.\n- [ ] Aucune clé secrète n’est versionnée.\n- [ ] Une erreur de test remonte dans Sentry.\n- [ ] La procédure de vérification est documentée."
+    },
+    {
+      "key": "m1",
+      "title": "Epic: M1 — Carte et lieux pilotes",
+      "labels": ["epic", "area: map", "priority: p1", "status: ready", "size: l"],
+      "body": "## Objectif\n\nPermettre à un étudiant de trouver rapidement une option de repas utile autour du secteur pilote Grands Moulins / Paris Rive Gauche.\n\n## Résultat attendu\n\nUne carte exploitable, alimentée par des lieux de démonstration fiables, avec recherche, filtres et accès au détail.\n\n## Critères d’acceptation\n\n- [ ] Les lieux pilotes s’affichent sur la carte.\n- [ ] Les filtres et la recherche réduisent les résultats correctement.\n- [ ] Chaque lieu ouvre un détail et un itinéraire."
+    },
+    {
+      "key": "m1-model",
+      "title": "Modéliser un lieu et charger les données de démonstration",
+      "labels": ["type: feature", "area: data", "priority: p1", "status: ready", "size: s"],
+      "body": "## Objectif\n\nDéfinir le modèle de données d’un lieu et intégrer une liste de démonstration pour le pilote.\n\n## Critères d’acceptation\n\n- [ ] Le type `Place` couvre nom, catégorie, prix, coordonnées, horaires et source.\n- [ ] Les données de démonstration contiennent des lieux CROUS, solidaires et abordables.\n- [ ] Les coordonnées sont validées.\n- [ ] La source et la date de vérification sont conservées."
+    },
+    {
+      "key": "m1-map",
+      "title": "Afficher la carte et les marqueurs de lieux",
+      "labels": ["type: feature", "area: map", "priority: p1", "status: ready", "size: m"],
+      "body": "## Objectif\n\nAfficher les lieux pilotes sur une carte native iOS et Android avec des marqueurs compréhensibles.\n\n## Critères d’acceptation\n\n- [ ] La carte est visible sur iOS et Android.\n- [ ] Les marqueurs reflètent la catégorie du lieu.\n- [ ] Les marqueurs proches sont regroupés ou écartés de façon lisible.\n- [ ] Le cadrage initial couvre le secteur Grands Moulins / Paris Rive Gauche."
+    },
+    {
+      "key": "m1-filters",
+      "title": "Ajouter filtres budget, catégorie et recherche",
+      "labels": ["type: feature", "area: mobile", "area: map", "priority: p1", "status: ready", "size: m"],
+      "body": "## Objectif\n\nPermettre à l’étudiant de réduire les lieux selon son budget, le type d’offre et un texte de recherche.\n\n## Critères d’acceptation\n\n- [ ] Les filtres budget correspondent aux données disponibles.\n- [ ] Les catégories CROUS, solidaire et commerce sont accessibles.\n- [ ] La recherche par nom ou type de lieu fonctionne.\n- [ ] Le nombre de résultats est mis à jour.\n- [ ] Un état vide explique clairement l’absence de résultat."
+    },
+    {
+      "key": "m1-place",
+      "title": "Créer la fiche d’un lieu et le départ vers l’itinéraire",
+      "labels": ["type: feature", "area: mobile", "priority: p1", "status: ready", "size: s"],
+      "body": "## Objectif\n\nDonner les informations utiles d’un lieu et permettre le départ vers une application de cartographie.\n\n## Critères d’acceptation\n\n- [ ] La fiche affiche prix, catégorie, adresse, horaires et informations pratiques.\n- [ ] Le bouton itinéraire ouvre une application compatible.\n- [ ] Le retour à la carte conserve le contexte.\n- [ ] Le contenu est accessible avec VoiceOver et TalkBack."
+    }
+  ],
+  "subIssues": [
+    { "parent": "m0", "child": "m0-identity" },
+    { "parent": "m0", "child": "m0-navigation" },
+    { "parent": "m0", "child": "m0-quality" },
+    { "parent": "m0", "child": "m0-sentry" },
+    { "parent": "m1", "child": "m1-model" },
+    { "parent": "m1", "child": "m1-map" },
+    { "parent": "m1", "child": "m1-filters" },
+    { "parent": "m1", "child": "m1-place" }
+  ],
+  "blockedBy": [
+    { "subject": "m1-map", "blocking": "m1-model" },
+    { "subject": "m1-filters", "blocking": "m1-map" },
+    { "subject": "m1-place", "blocking": "m1-map" }
+  ]
+}
