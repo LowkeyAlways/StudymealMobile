@@ -1,0 +1,8 @@
+node_modules
+.expo
+.git
+.env
+.env.*
+coverage
+dist
+*.log

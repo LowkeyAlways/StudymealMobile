@@ -1,0 +1,6 @@
+services:
+  quality:
+    build:
+      context: .
+      target: quality
+    command: npm run quality

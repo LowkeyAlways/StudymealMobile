@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question produit ou technique
+    url: https://github.com/LowkeyAlways/StudymealMobile/discussions
+    about: Utilise les discussions pour les questions qui ne sont pas encore des tickets actionnables.

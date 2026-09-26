@@ -1,0 +1,33 @@
+name: Fonctionnalité
+description: Proposer une fonctionnalité produit ou technique.
+title: "feat: "
+labels: ["type: feature", "status: triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème à résoudre
+      description: Pour quel utilisateur et dans quelle situation ?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Résultat attendu
+      description: Décris le comportement observable quand la fonctionnalité est terminée.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critères d’acceptation
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dépendances ou tickets liés
+      description: Indique les epics, sous-issues, maquettes ou décisions concernées.

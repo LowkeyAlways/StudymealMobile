@@ -1,0 +1,34 @@
+name: Bug
+description: Signaler un comportement qui ne correspond pas au résultat attendu.
+title: "bug: "
+labels: ["type: bug", "status: triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Résumé du problème
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Résultat attendu et résultat observé
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environnement
+      description: iOS/Android, modèle ou simulateur, version de l’app.
+    validations:
+      required: true
