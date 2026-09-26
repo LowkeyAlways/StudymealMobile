@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   issues: write
+  repository-projects: write
 
 jobs:
   bootstrap:
@@ -95,3 +96,78 @@ jobs:
                 `${relation.subject} blocked by ${relation.blocking}`,
               );
             }
+
+            const projectTitle = 'Studymeal — Product roadmap';
+            const projectQuery = `query($login: String!) {
+              user(login: $login) {
+                id
+                projectsV2(first: 100) { nodes { id title url } }
+              }
+            }`;
+            const projectOwner = await github.graphql(projectQuery, { login: owner });
+            let project = projectOwner.user.projectsV2.nodes.find(
+              (candidate) => candidate.title === projectTitle,
+            );
+
+            if (!project) {
+              const createdProject = await github.graphql(
+                `mutation($ownerId: ID!, $title: String!) {
+                  createProjectV2(input: {ownerId: $ownerId, title: $title}) {
+                    projectV2 { id title url }
+                  }
+                }`,
+                { ownerId: projectOwner.user.id, title: projectTitle },
+              );
+              project = createdProject.createProjectV2.projectV2;
+              core.info(`Created project: ${project.url}`);
+            } else {
+              core.info(`Found project: ${project.url}`);
+            }
+
+            const projectFields = await github.graphql(
+              `query($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    fields(first: 50) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField { id name options { id name } }
+                      }
+                    }
+                  }
+                }
+              }`,
+              { projectId: project.id },
+            );
+            const statusField = projectFields.node.fields.nodes.find((field) => field?.name === 'Status');
+            const todoOption = statusField?.options.find((option) => /^(todo|to do|à faire)$/i.test(option.name));
+
+            for (const issue of byKey.values()) {
+              const added = await github.graphql(
+                `mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                    item { id }
+                  }
+                }`,
+                { projectId: project.id, contentId: issue.node_id },
+              ).catch((error) => {
+                if (/already|exists|duplicate/i.test(String(error.message || error))) return null;
+                throw error;
+              });
+
+              if (added && statusField && todoOption) {
+                await github.graphql(
+                  `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                    updateProjectV2ItemFieldValue(input: {
+                      projectId: $projectId, itemId: $itemId, fieldId: $fieldId,
+                      value: {singleSelectOptionId: $optionId}
+                    }) { projectV2Item { id } }
+                  }`,
+                  {
+                    projectId: project.id, itemId: added.addProjectV2ItemById.item.id,
+                    fieldId: statusField.id, optionId: todoOption.id,
+                  },
+                );
+              }
+            }
+
+            core.notice(`Project ready: ${project.url}`);
