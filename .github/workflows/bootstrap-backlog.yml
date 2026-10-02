@@ -130,7 +130,7 @@ jobs:
                   ... on ProjectV2 {
                     fields(first: 50) {
                       nodes {
-                        ... on ProjectV2SingleSelectField { id name options { id name } }
+                        ... on ProjectV2SingleSelectField { id name options { id name color description } }
                       }
                     }
                   }
@@ -138,10 +138,34 @@ jobs:
               }`,
               { projectId: project.id },
             );
-            const statusField = projectFields.node.fields.nodes.find((field) => field?.name === 'Status');
-            const todoOption = statusField?.options.find((option) => /^(todo|to do|à faire)$/i.test(option.name));
+            let statusField = projectFields.node.fields.nodes.find((field) => field?.name === 'Status');
 
-            for (const issue of byKey.values()) {
+            // Le tableau possède une vraie colonne Backlog, distincte de « À faire ».
+            if (statusField && !statusField.options.some((option) => /^backlog$/i.test(option.name))) {
+              const updatedStatusField = await github.graphql(
+                `mutation($fieldId: ID!, $options: [ProjectV2SingleSelectFieldOptionInput!]!) {
+                  updateProjectV2Field(input: {fieldId: $fieldId, singleSelectOptions: $options}) {
+                    projectV2Field {
+                      ... on ProjectV2SingleSelectField { id name options { id name color description } }
+                    }
+                  }
+                }`,
+                {
+                  fieldId: statusField.id,
+                  options: [
+                    ...statusField.options.map(({ id, name, color, description }) => ({
+                      id, name, color, description,
+                    })),
+                    { name: 'Backlog', color: 'GRAY', description: 'À prioriser pour un futur jalon.' },
+                  ],
+                },
+              );
+              statusField = updatedStatusField.updateProjectV2Field.projectV2Field;
+            }
+
+            const definitionByKey = new Map(backlog.issues.map((definition) => [definition.key, definition]));
+
+            for (const [key, issue] of byKey.entries()) {
               const added = await github.graphql(
                 `mutation($projectId: ID!, $contentId: ID!) {
                   addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
@@ -154,7 +178,13 @@ jobs:
                 throw error;
               });
 
-              if (added && statusField && todoOption) {
+              const desiredStatus = definitionByKey.get(key).projectStatus || 'To do';
+              const statusOption = statusField?.options.find(
+                (option) => option.name.toLowerCase() === desiredStatus.toLowerCase()
+                  || (desiredStatus === 'To do' && /^(todo|à faire)$/i.test(option.name)),
+              );
+
+              if (added && statusField && statusOption) {
                 await github.graphql(
                   `mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
                     updateProjectV2ItemFieldValue(input: {
@@ -164,7 +194,7 @@ jobs:
                   }`,
                   {
                     projectId: project.id, itemId: added.addProjectV2ItemById.item.id,
-                    fieldId: statusField.id, optionId: todoOption.id,
+                    fieldId: statusField.id, optionId: statusOption.id,
                   },
                 );
               }

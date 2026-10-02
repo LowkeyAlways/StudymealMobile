@@ -59,6 +59,13 @@
       "title": "Créer la fiche d’un lieu et le départ vers l’itinéraire",
       "labels": ["type: feature", "area: mobile", "priority: p1", "status: ready", "size: s"],
       "body": "## Objectif\n\nDonner les informations utiles d’un lieu et permettre le départ vers une application de cartographie.\n\n## Critères d’acceptation\n\n- [ ] La fiche affiche prix, catégorie, adresse, horaires et informations pratiques.\n- [ ] Le bouton itinéraire ouvre une application compatible.\n- [ ] Le retour à la carte conserve le contexte.\n- [ ] Le contenu est accessible avec VoiceOver et TalkBack."
+    },
+    {
+      "key": "m2-crowd-trend",
+      "title": "Afficher et contribuer à la tendance d’affluence d’un lieu",
+      "projectStatus": "Backlog",
+      "labels": ["type: feature", "area: map", "area: backend", "priority: p2", "status: triage", "size: m"],
+      "body": "## Objectif\n\nPermettre aux étudiants de consulter une estimation récente de l’affluence et du temps d’attente d’un lieu, puis de contribuer à cette estimation.\n\n## MVP\n\n- L’étudiant peut signaler : fluide, modérée ou chargée.\n- Une estimation agrégée s’affiche avec l’heure du dernier signalement et un niveau de confiance.\n- Les signalements expirent après une durée courte afin de ne jamais présenter une donnée ancienne comme du direct.\n\n## Critères d’acceptation\n\n- [ ] Un lieu peut afficher une tendance, un temps d’attente indicatif et la fraîcheur de la donnée.\n- [ ] Un étudiant peut soumettre un signalement en quelques secondes.\n- [ ] Les signalements répétés ou abusifs sont limités.\n- [ ] L’état « pas assez de données » est explicite.\n- [ ] Les données personnelles et de localisation sont minimisées.\n\n## Dépendances\n\nCette fonctionnalité nécessite le modèle de lieux, la carte et un backend temps réel."
     }
   ],
   "subIssues": [
