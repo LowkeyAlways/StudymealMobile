@@ -32,8 +32,4 @@ export const styles = StyleSheet.create({
     lineHeight: 25,
     marginTop: 16,
   },
-  children: {
-    gap: 12,
-    marginTop: 24,
-  },
 });

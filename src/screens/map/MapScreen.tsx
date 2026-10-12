@@ -1,17 +1,11 @@
 import { FeaturePlaceholder } from '../../components/feedback/FeaturePlaceholder';
-import { PlaceCard } from '../../components/places/PlaceCard';
-import { places } from '../../data/places';
 
 export default function MapScreen() {
   return (
     <FeaturePlaceholder
-      eyebrow="AUTOUR DE TOI"
-      title="Trouve ton repas"
-      description={`Découvre ${places.length} lieux autour de ton campus.`}
-    >
-      {places.map((place) => (
-        <PlaceCard key={place.id} place={place} />
-      ))}
-    </FeaturePlaceholder>
+      eyebrow="PROCHAINEMENT"
+      title="La carte Studymeal"
+      description="Les lieux fiables autour du campus pilote apparaîtront ici, avec leurs prix et leurs horaires."
+    />
   );
 }
