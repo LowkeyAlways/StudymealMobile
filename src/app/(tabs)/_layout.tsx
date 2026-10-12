@@ -16,7 +16,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="map"
         options={{
-          title: 'Carte',
+          title: 'Trouver',
           tabBarIcon: ({ color }) => <TabIcon symbol="◎" color={color} />,
         }}
       />
