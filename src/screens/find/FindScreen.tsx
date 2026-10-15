@@ -6,7 +6,7 @@ import { places, type PlaceCategory } from '../../data/places';
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { colors } from '../../styles/theme/colors';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -15,7 +15,7 @@ const parisRiveGaucheRegion = {
   longitudeDelta: 0.012,
 };
 
-const sheetSnapPoints = ["26%", "82%"];
+const sheetSnapPoints = ["26%", "50%"];
 const markerColors: Record<PlaceCategory, string> = {
     crous: colors.markerCrous,
     solidaire: colors.markerSolidaire,
@@ -26,34 +26,49 @@ export default function FindScreen() {
 
     const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
     const selectedPlace = places.find(
       (place) => place.id === selectedPlaceId,
     );
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <MapView initialRegion={parisRiveGaucheRegion} style={styles.map}>
+      <MapView
+  initialRegion={parisRiveGaucheRegion}
+  style={styles.map}
+  onPress={() => {
+    setSelectedPlaceId(null);
+    bottomSheetRef.current?.snapToIndex(0);
+  }}
+>
         {places.map((place) => (
           <Marker
-            key={place.id}
-            coordinate={{
-              latitude: place.latitude,
-              longitude: place.longitude,
-            }}
-            pinColor={markerColors[place.category]}
-            title={place.name}
-            description={`${place.priceLabel} · ${place.address}`}
-            onPress={() => setSelectedPlaceId(place.id)}
-          />
+          key={place.id}
+          coordinate={{
+            latitude: place.latitude,
+            longitude: place.longitude,
+          }}
+          pinColor={markerColors[place.category]}
+          title={place.name}
+          description={`${place.priceLabel} · ${place.address}`}
+          stopPropagation
+          onPress={() => {
+            setSelectedPlaceId(place.id);
+            bottomSheetRef.current?.snapToIndex(1);
+          }}
+        />
         ))}
       </MapView>
 
       <BottomSheet
+        
         index={0}
         snapPoints={sheetSnapPoints}
         enableDynamicSizing={false}
         backgroundStyle={styles.sheetBackground}
         handleIndicatorStyle={styles.handle}
+        ref={bottomSheetRef}
       >
         <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
           <Text style={styles.eyebrow}>À PROXIMITÉ</Text>
