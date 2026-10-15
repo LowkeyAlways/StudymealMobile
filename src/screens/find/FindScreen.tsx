@@ -6,6 +6,7 @@ import { places, type PlaceCategory } from '../../data/places';
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { colors } from '../../styles/theme/colors';
+import { useState } from 'react';
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -22,6 +23,13 @@ const markerColors: Record<PlaceCategory, string> = {
   };
 
 export default function FindScreen() {
+
+    const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+
+    const selectedPlace = places.find(
+      (place) => place.id === selectedPlaceId,
+    );
+
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <MapView initialRegion={parisRiveGaucheRegion} style={styles.map}>
@@ -35,6 +43,7 @@ export default function FindScreen() {
             pinColor={markerColors[place.category]}
             title={place.name}
             description={`${place.priceLabel} · ${place.address}`}
+            onPress={() => setSelectedPlaceId(place.id)}
           />
         ))}
       </MapView>
@@ -48,11 +57,14 @@ export default function FindScreen() {
       >
         <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
           <Text style={styles.eyebrow}>À PROXIMITÉ</Text>
-          <Text style={styles.title}>Lieux autour de toi</Text>
-          <Text style={styles.description}>
-            Fais glisser cette fenêtre vers le haut pour consulter les bonnes
-            adresses.
+          <Text style={styles.title}>
+            {selectedPlace ? selectedPlace.name : 'Lieux autour de toi'}
           </Text>
+          <Text style={styles.description}>
+            {selectedPlace
+            ? `${selectedPlace.priceLabel} · ${selectedPlace.address}`
+            : 'Fais glisser cette fenêtre vers le haut pour consulter les bonnes adresses.'}
+            </Text>
 
           <View style={styles.placesList}>
             {places.map((place) => (
