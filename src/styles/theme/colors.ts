@@ -7,4 +7,7 @@ export const colors = {
   textSoft: '#486158',
   surfaceAccent: '#E3F1EB',
   white: '#FFFFFF',
+  markerCrous: '#0C5B4C',
+  markerSolidaire: '#7B3F98',
+  markerBonPlan: '#C97700',
 } as const;
