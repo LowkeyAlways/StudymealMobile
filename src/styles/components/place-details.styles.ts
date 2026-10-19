@@ -31,4 +31,10 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     padding: 18,
   },
+  category: {
+    color: colors.brand,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+  },
 });
