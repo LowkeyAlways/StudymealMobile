@@ -1,12 +1,12 @@
-import { Text, View } from "react-native";
+import { Text, View } from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker } from 'react-native-maps';
 import { styles } from "../../styles/screens/find.styles";
-import { places, type PlaceCategory } from "../../data/places";
+import { places, type Place, type PlaceCategory } from "../../data/places";
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
-import { useRef, useState } from "react";
+import { Fragment, useRef, useState } from 'react';
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 
 const parisRiveGaucheRegion = {
@@ -28,11 +28,32 @@ export default function FindScreen() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
+  const mapRef = useRef<MapView>(null);
+
+
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
+
+  const selectPlace = (place: Place) => {
+    setSelectedPlaceId(place.id);
+    bottomSheetRef.current?.snapToIndex(1);
+
+    mapRef.current?.animateToRegion(
+      {
+        latitude: place.latitude - 0.003,
+        longitude: place.longitude,
+        latitudeDelta: 0.012,
+        longitudeDelta: 0.012,
+      },
+      350,
+    );
+
+  };
+
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <MapView
+        ref={mapRef}
         initialRegion={parisRiveGaucheRegion}
         style={styles.map}
         onPress={() => {
@@ -40,23 +61,51 @@ export default function FindScreen() {
           bottomSheetRef.current?.snapToIndex(0);
         }}
       >
-        {places.map((place) => (
-          <Marker
-            key={place.id}
-            coordinate={{
-              latitude: place.latitude,
-              longitude: place.longitude,
-            }}
-            pinColor={markerColors[place.category]}
-            title={place.name}
-            description={`${place.priceLabel} · ${place.address}`}
-            stopPropagation
-            onPress={() => {
-              setSelectedPlaceId(place.id);
-              bottomSheetRef.current?.snapToIndex(1);
-            }}
-          />
-        ))}
+        {places.map((place) => {
+  const isSelected = selectedPlaceId === place.id;
+
+  return (
+    <Fragment key={place.id}>
+      <Marker
+        coordinate={{
+          latitude: place.latitude,
+          longitude: place.longitude,
+        }}
+        opacity={
+          selectedPlaceId && !isSelected ? 0.45 : 1
+        }
+        pinColor={markerColors[place.category]}
+        stopPropagation
+        onPress={() => selectPlace(place)}
+      />
+
+      {isSelected ? (
+        <Marker
+          anchor={{ x: 0.5, y: 1 }}
+          coordinate={{
+            latitude: place.latitude,
+            longitude: place.longitude,
+          }}
+          stopPropagation
+          zIndex={2}
+          onPress={() => selectPlace(place)}
+        >
+          <View
+            pointerEvents="none"
+            style={styles.selectedMarkerLabel}
+          >
+            <Text
+              numberOfLines={1}
+              style={styles.selectedMarkerLabelText}
+            >
+              {place.name}
+            </Text>
+          </View>
+        </Marker>
+      ) : null}
+    </Fragment>
+  );
+})}
       </MapView>
 
       <BottomSheet
@@ -85,7 +134,11 @@ export default function FindScreen() {
           ) : (
             <View style={styles.placesList}>
               {places.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+                <PlaceCard
+                  key={place.id}
+                  place={place}
+                  onPress={() => selectPlace(place)}
+                />
               ))}
             </View>
           )}

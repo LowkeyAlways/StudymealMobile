@@ -81,4 +81,26 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 4,
   },
+  selectedMarkerLabel: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    elevation: 4,
+    maxWidth: 200,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+    transform: [{ translateY: -40 }],
+  },
+  selectedMarkerLabelText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800',
+    
+  },
 });
