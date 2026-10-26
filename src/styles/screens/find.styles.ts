@@ -103,4 +103,45 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
     
   },
+  searchInput: {
+    backgroundColor: colors.white,
+    borderColor: '#DDE5DF',
+    borderRadius: 14,
+    borderWidth: 1,
+    color: colors.text,
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  suggestions: {
+    backgroundColor: colors.white,
+    borderColor: '#DDE5DF',
+    borderRadius: 14,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  suggestion: {
+    borderBottomColor: '#E8EEEA',
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  suggestionName: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  suggestionDetails: {
+    color: colors.textMuted,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  emptySuggestions: {
+    color: colors.textMuted,
+    fontSize: 14,
+    padding: 16,
+  },
+  searchSection: {
+    marginBottom: 18,
+  },
 });
