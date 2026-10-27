@@ -184,4 +184,17 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: 6,
   },
+  budgetFilterLabel: {
+    color: colors.brand,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.1,
+    marginBottom: 8,
+  },
+  resultCount: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 18,
+  },
 });

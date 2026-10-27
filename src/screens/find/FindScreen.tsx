@@ -25,11 +25,20 @@ const markerColors: Record<PlaceCategory, string> = {
 
 type CategoryFilter = PlaceCategory | "all";
 
+type BudgetFilter = number | "all";
+
 const categoryFilters: Array<{ id: CategoryFilter; label: string }> = [
   { id: "all", label: "Tous" },
   { id: "crous", label: "CROUS" },
   { id: "solidaire", label: "Solidaire" },
   { id: "bon-plan", label: "Bon plan" },
+];
+
+const budgetFilters: Array<{ value: BudgetFilter; label: string }> = [
+  { value: "all", label: "Tous budgets" },
+  { value: 3, label: "≤ 3 €" },
+  { value: 6, label: "≤ 6 €" },
+  { value: 10, label: "≤ 10 €" },
 ];
 
 export default function FindScreen() {
@@ -39,6 +48,8 @@ export default function FindScreen() {
 
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("all");
+
+  const [selectedBudget, setSelectedBudget] = useState<BudgetFilter>("all");
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -57,8 +68,12 @@ export default function FindScreen() {
   const categoryFilteredPlaces = places.filter((place) => {
     return selectedCategory === "all" || place.category === selectedCategory;
   });
-  
-  const filteredPlaces = categoryFilteredPlaces.filter((place) => {
+
+  const budgetFilteredPlaces = categoryFilteredPlaces.filter((place) => {
+    return selectedBudget === "all" || place.budgetAmount <= selectedBudget;
+  });
+
+  const filteredPlaces = budgetFilteredPlaces.filter((place) => {
     const searchableText = [
       place.name,
       place.category,
@@ -67,9 +82,21 @@ export default function FindScreen() {
     ]
       .join(" ")
       .toLocaleLowerCase("fr-FR");
-  
+
     return searchableText.includes(normalizedSearchQuery);
   });
+
+  const resultCount =
+    normalizedSearchQuery.length > 0
+      ? filteredPlaces.length
+      : budgetFilteredPlaces.length;
+
+  const resultLabel =
+    resultCount === 0
+      ? "Aucun lieu trouvé"
+      : resultCount === 1
+        ? "1 lieu trouvé"
+        : `${resultCount} lieux trouvés`;
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -118,7 +145,7 @@ export default function FindScreen() {
           bottomSheetRef.current?.snapToIndex(0);
         }}
       >
-        {categoryFilteredPlaces.map((place) => {
+        {budgetFilteredPlaces.map((place) => {
           const isSelected = selectedPlaceId === place.id;
 
           return (
@@ -194,7 +221,7 @@ export default function FindScreen() {
               </View>
             ) : null}
           </View>
-          {!selectedPlace && normalizedSearchQuery.length === 0 ? (
+          {!selectedPlace ? (
             <View style={styles.filters}>
               {categoryFilters.map((filter) => {
                 const isSelected = selectedCategory === filter.id;
@@ -224,6 +251,42 @@ export default function FindScreen() {
             </View>
           ) : null}
 
+          {!selectedPlace ? (
+            <View>
+              <Text style={styles.budgetFilterLabel}>BUDGET INDICATIF</Text>
+
+              <View style={styles.filters}>
+                {budgetFilters.map((filter) => {
+                  const isSelected = selectedBudget === filter.value;
+
+                  return (
+                    <Pressable
+                      key={filter.label}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isSelected }}
+                      onPress={() => setSelectedBudget(filter.value)}
+                      style={[
+                        styles.filterChip,
+                        isSelected ? styles.filterChipSelected : null,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.filterChipText,
+                          isSelected ? styles.filterChipTextSelected : null,
+                        ]}
+                      >
+                        {filter.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ) : null}
+          {!selectedPlace ? (
+            <Text style={styles.resultCount}>{resultLabel}</Text>
+          ) : null}
           <Text style={styles.eyebrow}>À PROXIMITÉ</Text>
 
           <Text style={styles.title}>
@@ -239,9 +302,9 @@ export default function FindScreen() {
           {selectedPlace ? (
             <PlaceDetails place={selectedPlace} />
           ) : normalizedSearchQuery.length === 0 ? (
-            categoryFilteredPlaces.length > 0 ? (
+            budgetFilteredPlaces.length > 0 ? (
               <View style={styles.placesList}>
-                {categoryFilteredPlaces.map((place) => (
+                {budgetFilteredPlaces.map((place) => (
                   <PlaceCard
                     key={place.id}
                     place={place}
@@ -252,10 +315,10 @@ export default function FindScreen() {
             ) : (
               <View style={styles.emptyCategoryState}>
                 <Text style={styles.emptyCategoryTitle}>
-                  Aucun lieu dans cette catégorie
+                  Aucun lieu ne correspond aux filtres
                 </Text>
                 <Text style={styles.emptyCategoryDescription}>
-                  Nous ajouterons bientôt de nouvelles bonnes adresses ici.
+                  Essaie un autre budget ou une autre catégorie.
                 </Text>
               </View>
             )

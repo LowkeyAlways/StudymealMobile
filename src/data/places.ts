@@ -5,6 +5,7 @@ export type Place = {
   name: string;
   category: PlaceCategory;
   priceLabel: string;
+  budgetAmount: number;
   address: string;
   latitude: number;
   longitude: number;
@@ -19,6 +20,7 @@ export const places: Place[] = [
   name: 'RU Halle aux Farines',
   category: 'crous',
   priceLabel: 'Tarif CROUS',
+  budgetAmount: 1,
   address: '3 esplanade Pierre Vidal-Naquet, 75013 Paris',
   latitude: 48.8296,
   longitude: 2.3805,
@@ -31,6 +33,7 @@ export const places: Place[] = [
   name: 'AGORAé Paris 13',
   category: 'solidaire',
   priceLabel: 'Tarif solidaire',
+  budgetAmount: 3,
   address: '3 allée Paris-Ivry, 75013 Paris',
   latitude: 48.8268,
   longitude: 2.3776,
