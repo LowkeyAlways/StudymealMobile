@@ -81,28 +81,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 4,
   },
-  selectedMarkerLabel: {
-    backgroundColor: colors.white,
-    borderRadius: 14,
-    elevation: 4,
-    maxWidth: 200,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.16,
-    shadowRadius: 8,
-    transform: [{ translateY: -40 }],
-  },
-  selectedMarkerLabelText: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '800',
-    
-  },
   searchInput: {
     backgroundColor: colors.white,
     borderColor: '#DDE5DF',
@@ -143,5 +121,67 @@ export const styles = StyleSheet.create({
   },
   searchSection: {
     marginBottom: 18,
+  },
+  filters: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 18,
+  },
+  filterChip: {
+    backgroundColor: colors.white,
+    borderColor: '#DDE5DF',
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
+  },
+  filterChipSelected: {
+    backgroundColor: colors.brand,
+    borderColor: colors.brand,
+  },
+  filterChipText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  filterChipTextSelected: {
+    color: colors.white,
+  },
+  markerCallout: {
+    backgroundColor: colors.white,
+    borderRadius: 14,
+    elevation: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.16,
+    shadowRadius: 8,
+  },
+  markerCalloutText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  emptyCategoryState: {
+    backgroundColor: '#EAF3EE',
+    borderRadius: 18,
+    marginTop: 18,
+    padding: 18,
+  },
+  emptyCategoryTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  emptyCategoryDescription: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 6,
   },
 });

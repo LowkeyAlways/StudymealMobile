@@ -1,12 +1,12 @@
 import { Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, type MapMarker } from "react-native-maps";
 import { styles } from "../../styles/screens/find.styles";
 import { places, type Place, type PlaceCategory } from "../../data/places";
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
-import { Fragment, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 
 const parisRiveGaucheRegion = {
@@ -16,27 +16,49 @@ const parisRiveGaucheRegion = {
   longitudeDelta: 0.012,
 };
 
-const sheetSnapPoints = ["26%", "50%", "88%"];
+const sheetSnapPoints = ["26%", "50%", "70%", "88%"];
 const markerColors: Record<PlaceCategory, string> = {
   crous: colors.markerCrous,
   solidaire: colors.markerSolidaire,
   "bon-plan": colors.markerBonPlan,
 };
 
+type CategoryFilter = PlaceCategory | "all";
+
+const categoryFilters: Array<{ id: CategoryFilter; label: string }> = [
+  { id: "all", label: "Tous" },
+  { id: "crous", label: "CROUS" },
+  { id: "solidaire", label: "Solidaire" },
+  { id: "bon-plan", label: "Bon plan" },
+];
+
 export default function FindScreen() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [selectedCategory, setSelectedCategory] =
+    useState<CategoryFilter>("all");
+
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const mapRef = useRef<MapView>(null);
+
+  const searchInputRef = useRef<TextInput>(null);
+
+  const markerRefs = useRef<Record<string, MapMarker | null>>({});
+
+  const ignoreMapPressRef = useRef(false);
 
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
 
   const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase("fr-FR");
 
-  const filteredPlaces = places.filter((place) => {
+  const categoryFilteredPlaces = places.filter((place) => {
+    return selectedCategory === "all" || place.category === selectedCategory;
+  });
+  
+  const filteredPlaces = categoryFilteredPlaces.filter((place) => {
     const searchableText = [
       place.name,
       place.category,
@@ -45,13 +67,27 @@ export default function FindScreen() {
     ]
       .join(" ")
       .toLocaleLowerCase("fr-FR");
-
+  
     return searchableText.includes(normalizedSearchQuery);
   });
 
-  const selectPlace = (place: Place) => {
+  const handleSearchChange = (text: string) => {
+    setSearchQuery(text);
+
+    if (selectedPlaceId !== null) {
+      markerRefs.current[selectedPlaceId]?.hideCallout();
+      setSelectedPlaceId(null);
+    }
+  };
+
+  const selectPlace = (place: Place, sheetIndex = 1) => {
+    ignoreMapPressRef.current = true;
+
+    setTimeout(() => {
+      ignoreMapPressRef.current = false;
+    }, 100);
     setSelectedPlaceId(place.id);
-    bottomSheetRef.current?.snapToIndex(1);
+    bottomSheetRef.current?.snapToIndex(sheetIndex);
 
     mapRef.current?.animateToRegion(
       {
@@ -62,6 +98,9 @@ export default function FindScreen() {
       },
       350,
     );
+    setTimeout(() => {
+      markerRefs.current[place.id]?.showCallout();
+    }, 400);
   };
 
   return (
@@ -71,48 +110,33 @@ export default function FindScreen() {
         initialRegion={parisRiveGaucheRegion}
         style={styles.map}
         onPress={() => {
+          if (ignoreMapPressRef.current) {
+            return;
+          }
+
           setSelectedPlaceId(null);
           bottomSheetRef.current?.snapToIndex(0);
         }}
       >
-        {places.map((place) => {
+        {categoryFilteredPlaces.map((place) => {
           const isSelected = selectedPlaceId === place.id;
 
           return (
-            <Fragment key={place.id}>
-              <Marker
-                coordinate={{
-                  latitude: place.latitude,
-                  longitude: place.longitude,
-                }}
-                opacity={selectedPlaceId && !isSelected ? 0.45 : 1}
-                pinColor={markerColors[place.category]}
-                stopPropagation
-                onPress={() => selectPlace(place)}
-              />
-
-              {isSelected ? (
-                <Marker
-                  anchor={{ x: 0.5, y: 1 }}
-                  coordinate={{
-                    latitude: place.latitude,
-                    longitude: place.longitude,
-                  }}
-                  stopPropagation
-                  zIndex={2}
-                  onPress={() => selectPlace(place)}
-                >
-                  <View pointerEvents="none" style={styles.selectedMarkerLabel}>
-                    <Text
-                      numberOfLines={1}
-                      style={styles.selectedMarkerLabelText}
-                    >
-                      {place.name}
-                    </Text>
-                  </View>
-                </Marker>
-              ) : null}
-            </Fragment>
+            <Marker
+              key={place.id}
+              ref={(marker) => {
+                markerRefs.current[place.id] = marker;
+              }}
+              coordinate={{
+                latitude: place.latitude,
+                longitude: place.longitude,
+              }}
+              title={place.name}
+              opacity={selectedPlaceId !== null && !isSelected ? 0.45 : 1}
+              pinColor={markerColors[place.category]}
+              calloutOffset={{ x: 0, y: -37 }}
+              onPress={() => selectPlace(place)}
+            ></Marker>
           );
         })}
       </MapView>
@@ -125,47 +149,81 @@ export default function FindScreen() {
         handleIndicatorStyle={styles.handle}
         ref={bottomSheetRef}
       >
-        <BottomSheetScrollView contentContainerStyle={styles.sheetContent}>
-        <View style={styles.searchSection}>
-  <TextInput
-    autoCapitalize="none"
-    onChangeText={setSearchQuery}
-    onFocus={() => bottomSheetRef.current?.snapToIndex(1)}
-    onPressIn={() => bottomSheetRef.current?.snapToIndex(1)}
-    placeholder="Rechercher un lieu"
-    placeholderTextColor={colors.textMuted}
-    style={styles.searchInput}
-    value={searchQuery}
-  />
+        <BottomSheetScrollView
+          contentContainerStyle={styles.sheetContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.searchSection}>
+            <TextInput
+              autoCapitalize="none"
+              ref={searchInputRef}
+              onChangeText={handleSearchChange}
+              onFocus={() => bottomSheetRef.current?.snapToIndex(2)}
+              placeholder="Rechercher un lieu"
+              placeholderTextColor={colors.textMuted}
+              style={styles.searchInput}
+              value={searchQuery}
+            />
 
-  {normalizedSearchQuery.length > 0 ? (
-    <View style={styles.suggestions}>
-      {filteredPlaces.length > 0 ? (
-        filteredPlaces.map((place) => (
-          <Pressable
-            key={place.id}
-            accessibilityLabel={`Sélectionner ${place.name}`}
-            accessibilityRole="button"
-            onPress={() => {
-              setSearchQuery('');
-              selectPlace(place);
-            }}
-            style={styles.suggestion}
-          >
-            <Text style={styles.suggestionName}>{place.name}</Text>
-            <Text style={styles.suggestionDetails}>
-              {place.priceLabel} · {place.address}
-            </Text>
-          </Pressable>
-        ))
-      ) : (
-        <Text style={styles.emptySuggestions}>
-          Aucun lieu ne correspond à cette recherche.
-        </Text>
-      )}
-    </View>
-  ) : null}
-</View>
+            {normalizedSearchQuery.length > 0 ? (
+              <View style={styles.suggestions}>
+                {filteredPlaces.length > 0 ? (
+                  filteredPlaces.map((place) => (
+                    <Pressable
+                      key={place.id}
+                      accessibilityLabel={`Sélectionner ${place.name}`}
+                      accessibilityRole="button"
+                      onPress={() => {
+                        searchInputRef.current?.blur();
+                        setSearchQuery("");
+                        selectPlace(place, 0);
+                      }}
+                      style={styles.suggestion}
+                    >
+                      <Text style={styles.suggestionName}>{place.name}</Text>
+                      <Text style={styles.suggestionDetails}>
+                        {place.priceLabel} · {place.address}
+                      </Text>
+                    </Pressable>
+                  ))
+                ) : (
+                  <Text style={styles.emptySuggestions}>
+                    Aucun lieu ne correspond à cette recherche.
+                  </Text>
+                )}
+              </View>
+            ) : null}
+          </View>
+          {!selectedPlace && normalizedSearchQuery.length === 0 ? (
+            <View style={styles.filters}>
+              {categoryFilters.map((filter) => {
+                const isSelected = selectedCategory === filter.id;
+
+                return (
+                  <Pressable
+                    key={filter.id}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    onPress={() => setSelectedCategory(filter.id)}
+                    style={[
+                      styles.filterChip,
+                      isSelected ? styles.filterChipSelected : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.filterChipText,
+                        isSelected ? styles.filterChipTextSelected : null,
+                      ]}
+                    >
+                      {filter.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+
           <Text style={styles.eyebrow}>À PROXIMITÉ</Text>
 
           <Text style={styles.title}>
@@ -181,15 +239,26 @@ export default function FindScreen() {
           {selectedPlace ? (
             <PlaceDetails place={selectedPlace} />
           ) : normalizedSearchQuery.length === 0 ? (
-            <View style={styles.placesList}>
-              {places.map((place) => (
-                <PlaceCard
-                  key={place.id}
-                  place={place}
-                  onPress={() => selectPlace(place)}
-                />
-              ))}
-            </View>
+            categoryFilteredPlaces.length > 0 ? (
+              <View style={styles.placesList}>
+                {categoryFilteredPlaces.map((place) => (
+                  <PlaceCard
+                    key={place.id}
+                    place={place}
+                    onPress={() => selectPlace(place)}
+                  />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyCategoryState}>
+                <Text style={styles.emptyCategoryTitle}>
+                  Aucun lieu dans cette catégorie
+                </Text>
+                <Text style={styles.emptyCategoryDescription}>
+                  Nous ajouterons bientôt de nouvelles bonnes adresses ici.
+                </Text>
+              </View>
+            )
           ) : null}
         </BottomSheetScrollView>
       </BottomSheet>
