@@ -1,6 +1,6 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
-import { colors } from '../theme/colors';
+import { colors } from "../theme/colors";
 
 export const styles = StyleSheet.create({
   screen: {
@@ -9,20 +9,20 @@ export const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   eyebrow: {
     color: colors.brand,
     fontSize: 12,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: 1.4,
     marginBottom: 14,
   },
   title: {
     color: colors.text,
     fontSize: 34,
-    fontWeight: '800',
+    fontWeight: "800",
     letterSpacing: -1.2,
     lineHeight: 39,
   },
