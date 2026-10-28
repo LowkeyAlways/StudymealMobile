@@ -1,4 +1,4 @@
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Keyboard, Pressable, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, type MapMarker } from "react-native-maps";
 import { styles } from "../../styles/screens/find.styles";
@@ -8,6 +8,7 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
 import { useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
+import { useFavorites } from '../../contexts/FavoritesContext';
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -60,6 +61,8 @@ export default function FindScreen() {
   const markerRefs = useRef<Record<string, MapMarker | null>>({});
 
   const ignoreMapPressRef = useRef(false);
+
+  const { favoritePlaceIds, toggleFavorite } = useFavorites();
 
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
 
@@ -140,7 +143,10 @@ export default function FindScreen() {
           if (ignoreMapPressRef.current) {
             return;
           }
-
+        
+          searchInputRef.current?.blur();
+          Keyboard.dismiss();
+        
           setSelectedPlaceId(null);
           bottomSheetRef.current?.snapToIndex(0);
         }}
@@ -300,7 +306,11 @@ export default function FindScreen() {
           </Text>
 
           {selectedPlace ? (
-            <PlaceDetails place={selectedPlace} />
+            <PlaceDetails
+            isFavorite={favoritePlaceIds.includes(selectedPlace.id)}
+            onToggleFavorite={() => toggleFavorite(selectedPlace.id)}
+            place={selectedPlace}
+          />
           ) : normalizedSearchQuery.length === 0 ? (
             budgetFilteredPlaces.length > 0 ? (
               <View style={styles.placesList}>

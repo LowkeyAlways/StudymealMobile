@@ -36,5 +36,26 @@ export const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1.2,
+    marginBottom: 14,
+  },
+  favoriteButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.white,
+    borderColor: colors.brand,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  favoriteButtonActive: {
+    backgroundColor: colors.brand,
+  },
+  favoriteButtonText: {
+    color: colors.brand,
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  favoriteButtonTextActive: {
+    color: colors.white,
   },
 });
