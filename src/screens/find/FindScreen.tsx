@@ -1,6 +1,13 @@
-import { Keyboard, Pressable, Text, TextInput, View } from "react-native";
+import {
+  Keyboard,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+  Alert,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker, type MapMarker } from "react-native-maps";
+import MapView, { Marker, Polyline, type MapMarker } from "react-native-maps";
 import { styles } from "../../styles/screens/find.styles";
 import { places, type Place, type PlaceCategory } from "../../data/places";
 import { PlaceCard } from "../../components/places/PlaceCard";
@@ -8,7 +15,12 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
 import { useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
-import { useFavorites } from '../../contexts/FavoritesContext';
+import { useFavorites } from "../../contexts/FavoritesContext";
+import {
+  getWalkingRoute,
+  type WalkingRoute,
+} from "../../services/directions/getWalkingRoute";
+import { getUserLocation } from "../../services/location/getUserLocation";
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -51,6 +63,9 @@ export default function FindScreen() {
     useState<CategoryFilter>("all");
 
   const [selectedBudget, setSelectedBudget] = useState<BudgetFilter>("all");
+
+  const [walkingRoute, setWalkingRoute] = useState<WalkingRoute | null>(null);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -116,6 +131,7 @@ export default function FindScreen() {
     setTimeout(() => {
       ignoreMapPressRef.current = false;
     }, 100);
+    setWalkingRoute(null);
     setSelectedPlaceId(place.id);
     bottomSheetRef.current?.snapToIndex(sheetIndex);
 
@@ -133,6 +149,80 @@ export default function FindScreen() {
     }, 400);
   };
 
+  const handleRequestDirections = async () => {
+    if (!selectedPlace || isRouteLoading) {
+      return;
+    }
+
+    setIsRouteLoading(true);
+
+    try {
+      const locationResult = await getUserLocation();
+
+      if (locationResult.status !== "success") {
+        const messages = {
+          "permission-denied":
+            "Autorise Studymeal à accéder à ta position pour calculer l’itinéraire.",
+          "services-disabled":
+            "Active les services de localisation de ton appareil, puis réessaie.",
+          unavailable:
+            "Studymeal ne parvient pas à récupérer ta position pour le moment.",
+        };
+
+        Alert.alert("Position indisponible", messages[locationResult.status]);
+        return;
+      }
+
+      const routeResult = await getWalkingRoute(locationResult.coordinates, {
+        latitude: selectedPlace.latitude,
+        longitude: selectedPlace.longitude,
+      });
+
+      if (routeResult.status !== "success") {
+        Alert.alert(
+          "Itinéraire indisponible",
+          routeResult.status === "missing-token"
+            ? "La clé Mapbox est absente de la configuration locale."
+            : "Studymeal ne parvient pas à calculer cet itinéraire pour le moment.",
+        );
+        return;
+      }
+
+      setWalkingRoute(routeResult.route);
+
+      bottomSheetRef.current?.snapToIndex(1);
+
+      mapRef.current?.fitToCoordinates(routeResult.route.coordinates, {
+        animated: true,
+        edgePadding: {
+          bottom: 480,
+          left: 40,
+          right: 40,
+          top: 120,
+        },
+      });
+    } finally {
+      setIsRouteLoading(false);
+    }
+  };
+
+  const routeStart = walkingRoute?.coordinates[0];
+
+  const routeSummary = walkingRoute
+    ? `${Math.ceil(walkingRoute.durationSeconds / 60)} min à pied · ${
+        walkingRoute.distanceMeters < 1000
+          ? `${Math.round(walkingRoute.distanceMeters)} m`
+          : `${(walkingRoute.distanceMeters / 1000).toFixed(1)} km`
+      }`
+    : null;
+
+  const routeSummaryCoordinate = walkingRoute
+    ? walkingRoute.coordinates[Math.floor(walkingRoute.coordinates.length / 2)]
+    : null;
+
+  const visibleMapPlaces =
+    walkingRoute && selectedPlace ? [selectedPlace] : budgetFilteredPlaces;
+
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
       <MapView
@@ -143,15 +233,50 @@ export default function FindScreen() {
           if (ignoreMapPressRef.current) {
             return;
           }
-        
+
           searchInputRef.current?.blur();
           Keyboard.dismiss();
-        
+
+          if (selectedPlaceId !== null) {
+            markerRefs.current[selectedPlaceId]?.hideCallout();
+          }
+
           setSelectedPlaceId(null);
           bottomSheetRef.current?.snapToIndex(0);
+          setWalkingRoute(null);
         }}
       >
-        {budgetFilteredPlaces.map((place) => {
+        {routeStart ? (
+          <Marker
+            anchor={{ x: 0.5, y: 0.5 }}
+            coordinate={routeStart}
+            zIndex={20}
+          >
+            <View style={styles.routeStartMarker}>
+              <View style={styles.routeStartMarkerCore} />
+            </View>
+          </Marker>
+        ) : null}
+        {walkingRoute ? (
+          <Polyline
+            coordinates={walkingRoute.coordinates}
+            strokeColor={colors.brand}
+            strokeWidth={5}
+          />
+        ) : null}
+
+        {routeSummaryCoordinate && routeSummary ? (
+          <Marker
+            anchor={{ x: 0.5, y: 0.5 }}
+            coordinate={routeSummaryCoordinate}
+            zIndex={30}
+          >
+            <View style={styles.routeSummaryMarker}>
+              <Text style={styles.routeSummaryMarkerText}>{routeSummary}</Text>
+            </View>
+          </Marker>
+        ) : null}
+        {visibleMapPlaces.map((place) => {
           const isSelected = selectedPlaceId === place.id;
 
           return (
@@ -307,10 +432,13 @@ export default function FindScreen() {
 
           {selectedPlace ? (
             <PlaceDetails
-            isFavorite={favoritePlaceIds.includes(selectedPlace.id)}
-            onToggleFavorite={() => toggleFavorite(selectedPlace.id)}
-            place={selectedPlace}
-          />
+              isFavorite={favoritePlaceIds.includes(selectedPlace.id)}
+              onToggleFavorite={() => toggleFavorite(selectedPlace.id)}
+              place={selectedPlace}
+              isRouteLoading={isRouteLoading}
+              onRequestDirections={handleRequestDirections}
+              routeSummary={routeSummary}
+            />
           ) : normalizedSearchQuery.length === 0 ? (
             budgetFilteredPlaces.length > 0 ? (
               <View style={styles.placesList}>

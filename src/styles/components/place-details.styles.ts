@@ -58,4 +58,26 @@ export const styles = StyleSheet.create({
   favoriteButtonTextActive: {
     color: colors.white,
   },
+  directionsButton: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.brand,
+    borderRadius: 999,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  directionsButtonDisabled: {
+    opacity: 0.6,
+  },
+  directionsButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  routeSummary: {
+    color: colors.brand,
+    fontSize: 15,
+    fontWeight: "800",
+    marginTop: 12,
+  },
 });
