@@ -151,7 +151,9 @@ export default function FindScreen() {
     }, 400);
   };
 
-  const handleRequestDirections = async () => {
+  const handleRequestDirections = async (
+    mode: RouteMode = selectedRouteMode,
+  ) => {
     if (!selectedPlace || isRouteLoading) {
       return;
     }
@@ -181,7 +183,7 @@ export default function FindScreen() {
           latitude: selectedPlace.latitude,
           longitude: selectedPlace.longitude,
         },
-        selectedRouteMode,
+        mode,
       );
 
       if (routeResult.status !== "success") {
@@ -217,12 +219,18 @@ export default function FindScreen() {
   };
 
   const handleSelectRouteMode = (mode: RouteMode) => {
-    if (mode === selectedRouteMode) {
+    if (mode === selectedRouteMode || isRouteLoading) {
       return;
     }
 
+    const hasActiveRoute = walkingRoute !== null;
+
     setSelectedRouteMode(mode);
-    setWalkingRoute(null);
+
+    if (hasActiveRoute) {
+      setWalkingRoute(null);
+      void handleRequestDirections(mode);
+    }
   };
 
   const routeStart = walkingRoute?.coordinates[0];

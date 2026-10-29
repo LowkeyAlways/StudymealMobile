@@ -80,7 +80,7 @@ export function PlaceDetails({
           accessibilityLabel={`${routeModeActionLabels[selectedRouteMode]} vers ${place.name}`}
           accessibilityRole="button"
           disabled={isRouteLoading}
-          onPress={onRequestDirections}
+          onPress={() => onRequestDirections()}
           style={[
             styles.directionsButton,
             isRouteLoading ? styles.directionsButtonDisabled : null,
