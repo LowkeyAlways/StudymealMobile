@@ -16,11 +16,9 @@ import { colors } from "../../styles/theme/colors";
 import { useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 import { useFavorites } from "../../contexts/FavoritesContext";
-import {
-  getWalkingRoute,
-  type WalkingRoute,
-} from "../../services/directions/getWalkingRoute";
+import { getRoute, type Route } from "../../services/directions/getRoute";
 import { getUserLocation } from "../../services/location/getUserLocation";
+import { routeModeLabels, type RouteMode } from "../../types/directions";
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -64,8 +62,12 @@ export default function FindScreen() {
 
   const [selectedBudget, setSelectedBudget] = useState<BudgetFilter>("all");
 
-  const [walkingRoute, setWalkingRoute] = useState<WalkingRoute | null>(null);
+  const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
+
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+
+  const [selectedRouteMode, setSelectedRouteMode] =
+    useState<RouteMode>("walking");
 
   const bottomSheetRef = useRef<BottomSheet>(null);
 
@@ -173,10 +175,14 @@ export default function FindScreen() {
         return;
       }
 
-      const routeResult = await getWalkingRoute(locationResult.coordinates, {
-        latitude: selectedPlace.latitude,
-        longitude: selectedPlace.longitude,
-      });
+      const routeResult = await getRoute(
+        locationResult.coordinates,
+        {
+          latitude: selectedPlace.latitude,
+          longitude: selectedPlace.longitude,
+        },
+        selectedRouteMode,
+      );
 
       if (routeResult.status !== "success") {
         Alert.alert(
@@ -209,14 +215,24 @@ export default function FindScreen() {
   const handleClearDirections = () => {
     setWalkingRoute(null);
   };
+
+  const handleSelectRouteMode = (mode: RouteMode) => {
+    if (mode === selectedRouteMode) {
+      return;
+    }
+
+    setSelectedRouteMode(mode);
+    setWalkingRoute(null);
+  };
+
   const routeStart = walkingRoute?.coordinates[0];
 
   const routeSummary = walkingRoute
-    ? `${Math.ceil(walkingRoute.durationSeconds / 60)} min à pied · ${
+    ? `${Math.ceil(walkingRoute.durationSeconds / 60)} min · ${
         walkingRoute.distanceMeters < 1000
           ? `${Math.round(walkingRoute.distanceMeters)} m`
           : `${(walkingRoute.distanceMeters / 1000).toFixed(1)} km`
-      }`
+      } · ${routeModeLabels[selectedRouteMode]}`
     : null;
 
   const routeSummaryCoordinate = walkingRoute
@@ -442,6 +458,8 @@ export default function FindScreen() {
               onRequestDirections={handleRequestDirections}
               onClearDirections={handleClearDirections}
               routeSummary={routeSummary}
+              onSelectRouteMode={handleSelectRouteMode}
+              selectedRouteMode={selectedRouteMode}
             />
           ) : normalizedSearchQuery.length === 0 ? (
             budgetFilteredPlaces.length > 0 ? (

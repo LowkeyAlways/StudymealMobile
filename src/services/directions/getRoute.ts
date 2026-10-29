@@ -1,22 +1,16 @@
+import type { RouteMode } from "../../types/directions";
 import type { UserCoordinates } from "../location/getUserLocation";
 
-export type WalkingRoute = {
+export type Route = {
   coordinates: UserCoordinates[];
   distanceMeters: number;
   durationSeconds: number;
 };
 
-export type WalkingRouteResult =
-  | {
-      status: "success";
-      route: WalkingRoute;
-    }
-  | {
-      status: "missing-token";
-    }
-  | {
-      status: "unavailable";
-    };
+export type RouteResult =
+  | { status: "success"; route: Route }
+  | { status: "missing-token" }
+  | { status: "unavailable" };
 
 type MapboxDirectionsResponse = {
   routes?: Array<{
@@ -28,10 +22,11 @@ type MapboxDirectionsResponse = {
   }>;
 };
 
-export async function getWalkingRoute(
+export async function getRoute(
   origin: UserCoordinates,
   destination: UserCoordinates,
-): Promise<WalkingRouteResult> {
+  mode: RouteMode,
+): Promise<RouteResult> {
   const accessToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
   if (!accessToken) {
@@ -44,7 +39,7 @@ export async function getWalkingRoute(
   ].join(";");
 
   const url =
-    `https://api.mapbox.com/directions/v5/mapbox/walking/${coordinates}` +
+    `https://api.mapbox.com/directions/v5/mapbox/${mode}/${coordinates}` +
     `?access_token=${encodeURIComponent(accessToken)}` +
     "&geometries=geojson" +
     "&overview=full";
