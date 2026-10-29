@@ -17,8 +17,12 @@ import { useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 import { useFavorites } from "../../contexts/FavoritesContext";
 import { getRoute, type Route } from "../../services/directions/getRoute";
-import { getUserLocation } from "../../services/location/getUserLocation";
+import {
+  getUserLocation,
+  type UserCoordinates,
+} from "../../services/location/getUserLocation";
 import { routeModeLabels, type RouteMode } from "../../types/directions";
+import { UserLocationButton } from "../../components/map/UserLocationButton";
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -65,6 +69,12 @@ export default function FindScreen() {
   const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
 
   const [isRouteLoading, setIsRouteLoading] = useState(false);
+
+  const [userLocation, setUserLocation] = useState<UserCoordinates | null>(
+    null,
+  );
+
+  const [isLocatingUser, setIsLocatingUser] = useState(false);
 
   const [selectedRouteMode, setSelectedRouteMode] =
     useState<RouteMode>("walking");
@@ -214,6 +224,48 @@ export default function FindScreen() {
     }
   };
 
+  const handleCenterOnUser = async () => {
+    if (isLocatingUser) {
+      return;
+    }
+
+    setIsLocatingUser(true);
+
+    try {
+      const locationResult = await getUserLocation();
+
+      if (locationResult.status === "success") {
+        setUserLocation(locationResult.coordinates);
+        bottomSheetRef.current?.snapToIndex(0);
+
+        mapRef.current?.animateToRegion(
+          {
+            latitude: locationResult.coordinates.latitude,
+            longitude: locationResult.coordinates.longitude,
+            latitudeDelta: 0.006,
+            longitudeDelta: 0.006,
+          },
+          350,
+        );
+
+        return;
+      }
+
+      const messages = {
+        "permission-denied":
+          "Autorise Studymeal à accéder à ta position pour te recentrer sur la carte.",
+        "services-disabled":
+          "Active les services de localisation de ton appareil, puis réessaie.",
+        unavailable:
+          "Studymeal ne parvient pas à récupérer ta position pour le moment.",
+      };
+
+      Alert.alert("Position indisponible", messages[locationResult.status]);
+    } finally {
+      setIsLocatingUser(false);
+    }
+  };
+
   const handleClearDirections = () => {
     setWalkingRoute(null);
   };
@@ -273,6 +325,17 @@ export default function FindScreen() {
           setWalkingRoute(null);
         }}
       >
+        {userLocation ? (
+          <Marker
+            anchor={{ x: 0.5, y: 0.5 }}
+            coordinate={userLocation}
+            zIndex={40}
+          >
+            <View style={styles.userLocationMarker}>
+              <View style={styles.userLocationMarkerCore} />
+            </View>
+          </Marker>
+        ) : null}
         {routeStart ? (
           <Marker
             anchor={{ x: 0.5, y: 0.5 }}
@@ -325,6 +388,11 @@ export default function FindScreen() {
           );
         })}
       </MapView>
+
+      <UserLocationButton
+        isLoading={isLocatingUser}
+        onPress={handleCenterOnUser}
+      />
 
       <BottomSheet
         index={0}

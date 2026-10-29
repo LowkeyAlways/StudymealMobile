@@ -232,4 +232,20 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
   },
+  userLocationMarker: {
+    alignItems: "center",
+    backgroundColor: "rgba(0, 122, 255, 0.22)",
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  userLocationMarkerCore: {
+    backgroundColor: "#007AFF",
+    borderColor: colors.white,
+    borderRadius: 10,
+    borderWidth: 3,
+    height: 20,
+    width: 20,
+  },
 });
