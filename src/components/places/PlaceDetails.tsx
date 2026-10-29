@@ -9,6 +9,7 @@ type PlaceDetailsProps = {
   isRouteLoading: boolean;
   onRequestDirections: () => void;
   routeSummary: string | null;
+  onClearDirections: () => void;
 };
 
 const categoryLabels: Record<Place["category"], string> = {
@@ -23,7 +24,8 @@ export function PlaceDetails({
   place,
   isRouteLoading,
   onRequestDirections,
-  routeSummary
+  routeSummary,
+  onClearDirections
 }: PlaceDetailsProps) {
   return (
     <View style={styles.container}>
@@ -52,20 +54,33 @@ export function PlaceDetails({
           {isFavorite ? "♥ Dans les favoris" : "♡ Ajouter aux favoris"}
         </Text>
       </Pressable>
-      <Pressable
-  accessibilityLabel={`Afficher l'itinéraire à pied vers ${place.name}`}
-  accessibilityRole="button"
-  disabled={isRouteLoading}
-  onPress={onRequestDirections}
-  style={[
-    styles.directionsButton,
-    isRouteLoading ? styles.directionsButtonDisabled : null,
-  ]}
->
-  <Text style={styles.directionsButtonText}>
-    {isRouteLoading ? "Calcul de l’itinéraire…" : "Itinéraire à pied"}
-  </Text>
-</Pressable>
+      {routeSummary ? (
+  <Pressable
+    accessibilityLabel={`Retirer l'itinéraire vers ${place.name}`}
+    accessibilityRole="button"
+    onPress={onClearDirections}
+    style={styles.clearDirectionsButton}
+  >
+    <Text style={styles.clearDirectionsButtonText}>
+      Retirer l’itinéraire
+    </Text>
+  </Pressable>
+) : (
+  <Pressable
+    accessibilityLabel={`Afficher l'itinéraire à pied vers ${place.name}`}
+    accessibilityRole="button"
+    disabled={isRouteLoading}
+    onPress={onRequestDirections}
+    style={[
+      styles.directionsButton,
+      isRouteLoading ? styles.directionsButtonDisabled : null,
+    ]}
+  >
+    <Text style={styles.directionsButtonText}>
+      {isRouteLoading ? "Calcul de l’itinéraire…" : "Itinéraire à pied"}
+    </Text>
+  </Pressable>
+)}
 {routeSummary ? (
   <Text style={styles.routeSummary}>{routeSummary}</Text>
 ) : null}

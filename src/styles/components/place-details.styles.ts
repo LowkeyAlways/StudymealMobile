@@ -80,4 +80,19 @@ export const styles = StyleSheet.create({
     fontWeight: "800",
     marginTop: 12,
   },
+  clearDirectionsButton: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.white,
+    borderColor: colors.brand,
+    borderRadius: 999,
+    borderWidth: 1,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  clearDirectionsButtonText: {
+    color: colors.brand,
+    fontSize: 14,
+    fontWeight: "800",
+  },
 });

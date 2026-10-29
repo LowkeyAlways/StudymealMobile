@@ -206,6 +206,9 @@ export default function FindScreen() {
     }
   };
 
+  const handleClearDirections = () => {
+    setWalkingRoute(null);
+  };
   const routeStart = walkingRoute?.coordinates[0];
 
   const routeSummary = walkingRoute
@@ -437,6 +440,7 @@ export default function FindScreen() {
               place={selectedPlace}
               isRouteLoading={isRouteLoading}
               onRequestDirections={handleRequestDirections}
+              onClearDirections={handleClearDirections}
               routeSummary={routeSummary}
             />
           ) : normalizedSearchQuery.length === 0 ? (
