@@ -187,6 +187,8 @@ export default function FindScreen() {
         return;
       }
 
+      setUserLocation(locationResult.coordinates);
+
       const routeResult = await getRoute(
         locationResult.coordinates,
         {
@@ -300,7 +302,9 @@ export default function FindScreen() {
     : null;
 
   const visibleMapPlaces =
-    walkingRoute && selectedPlace ? [selectedPlace] : budgetFilteredPlaces;
+    (walkingRoute || isRouteLoading) && selectedPlace
+      ? [selectedPlace]
+      : budgetFilteredPlaces;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
