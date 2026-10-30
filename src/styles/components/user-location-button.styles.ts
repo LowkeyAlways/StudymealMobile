@@ -19,7 +19,7 @@ export const styles = StyleSheet.create({
     },
     shadowOpacity: 0.18,
     shadowRadius: 6,
-    top: 40,
+    top: 45,
     width: 48,
   },
   buttonLoading: {
