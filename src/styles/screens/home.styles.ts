@@ -5,8 +5,11 @@ import { colors } from "../theme/colors";
 /** Styles propres à HomeScreen. Les styles partagés vont dans `src/styles/theme`. */
 export const styles = StyleSheet.create({
   screen: {
-    flex: 1,
     backgroundColor: colors.background,
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 24,
     paddingHorizontal: 24,
   },
   header: {
@@ -35,8 +38,7 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
   content: {
-    flex: 1,
-    justifyContent: "center",
+    paddingTop: 96,
   },
   eyebrow: {
     color: colors.brand,
@@ -63,6 +65,7 @@ export const styles = StyleSheet.create({
     borderRadius: 22,
     marginBottom: 18,
     padding: 20,
+    marginTop: 16,
   },
   stepLabel: {
     color: colors.brand,
@@ -81,5 +84,112 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginTop: 8,
+  },
+  primaryAction: {
+    alignItems: "center",
+    backgroundColor: colors.brand,
+    borderRadius: 999,
+    marginTop: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+  },
+  primaryActionText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  secondaryAction: {
+    alignSelf: "flex-start",
+    borderColor: colors.brand,
+    borderRadius: 999,
+    borderWidth: 1,
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  secondaryActionText: {
+    color: colors.brand,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  contextCard: {
+    backgroundColor: colors.white,
+    borderColor: "#E2E9E5",
+    borderRadius: 20,
+    borderWidth: 1,
+    marginTop: 16,
+    padding: 18,
+  },
+  contextLabel: {
+    color: colors.brand,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  contextMetrics: {
+    alignItems: "center",
+    flexDirection: "row",
+    marginTop: 14,
+  },
+  contextMetric: {
+    flex: 1,
+  },
+  contextValue: {
+    color: colors.text,
+    fontSize: 25,
+    fontWeight: "800",
+    letterSpacing: -0.8,
+  },
+  contextText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 3,
+  },
+  contextDivider: {
+    backgroundColor: "#E2E9E5",
+    height: 38,
+    marginHorizontal: 16,
+    width: 1,
+  },
+  mission: {
+    color: colors.textMuted,
+    fontSize: 16,
+    lineHeight: 23,
+    marginTop: 16,
+  },
+  featuredCard: {
+    borderColor: "#E2E9E5",
+    borderRadius: 20,
+    borderWidth: 1,
+    marginTop: 16,
+    padding: 18,
+  },
+  featuredLabel: {
+    color: colors.brand,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  featuredName: {
+    color: colors.text,
+    fontSize: 19,
+    fontWeight: "800",
+    marginTop: 7,
+  },
+  featuredDetails: {
+    color: colors.textMuted,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 5,
+  },
+  featuredAction: {
+    alignSelf: "flex-start",
+    marginTop: 14,
+  },
+  featuredActionText: {
+    color: colors.brand,
+    fontSize: 14,
+    fontWeight: "800",
   },
 });
