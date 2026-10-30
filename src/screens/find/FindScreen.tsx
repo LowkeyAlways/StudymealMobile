@@ -32,6 +32,10 @@ import {
 } from "../../services/location/getUserLocation";
 import { routeModeLabels, type RouteMode } from "../../types/directions";
 import { UserLocationButton } from "../../components/map/UserLocationButton";
+import {
+  type CategoryPreference,
+  usePreferences,
+} from "../../contexts/PreferencesContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 const parisRiveGaucheRegion = {
@@ -48,15 +52,16 @@ const markerColors: Record<PlaceCategory, string> = {
   "bon-plan": colors.markerBonPlan,
 };
 
-type CategoryFilter = PlaceCategory | "all";
-
 type BudgetFilter = number | "all";
 
-const categoryFilters: { id: CategoryFilter; label: string }[] = [
-  { id: "all", label: "Tous" },
-  { id: "crous", label: "CROUS" },
-  { id: "solidaire", label: "Solidaire" },
-  { id: "bon-plan", label: "Bon plan" },
+const categoryFilters: {
+  color: string;
+  id: CategoryPreference;
+  label: string;
+}[] = [
+  { color: colors.markerCrous, id: "crous", label: "CROUS" },
+  { color: colors.markerSolidaire, id: "solidaire", label: "Solidaire" },
+  { color: colors.markerBonPlan, id: "bon-plan", label: "Bon plan" },
 ];
 
 const budgetFilters: { value: BudgetFilter; label: string }[] = [
@@ -84,10 +89,10 @@ export default function FindScreen() {
 
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<CategoryFilter>("all");
-
   const [selectedBudget, setSelectedBudget] = useState<BudgetFilter>("all");
+
+  const [hasSelectedBudgetManually, setHasSelectedBudgetManually] =
+    useState(false);
 
   const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
 
@@ -113,17 +118,28 @@ export default function FindScreen() {
   const ignoreMapPressRef = useRef(false);
 
   const { favoritePlaceIds, toggleFavorite } = useFavorites();
+  const {
+    isPreferencesLoading,
+    selectedBudget: preferredBudget,
+    selectedCategories,
+    setCategories,
+  } = usePreferences();
 
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
 
   const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase("fr-FR");
 
+  const activeBudget =
+    !isPreferencesLoading && !hasSelectedBudgetManually
+      ? preferredBudget
+      : selectedBudget;
+
   const categoryFilteredPlaces = places.filter((place) => {
-    return selectedCategory === "all" || place.category === selectedCategory;
+    return selectedCategories.includes(place.category);
   });
 
   const budgetFilteredPlaces = categoryFilteredPlaces.filter((place) => {
-    return selectedBudget === "all" || place.budgetAmount <= selectedBudget;
+    return activeBudget === "all" || place.budgetAmount <= activeBudget;
   });
 
   const filteredPlaces = budgetFilteredPlaces.filter((place) => {
@@ -150,6 +166,22 @@ export default function FindScreen() {
       : resultCount === 1
         ? "1 lieu trouvé"
         : `${resultCount} lieux trouvés`;
+
+  const toggleCategory = (category: CategoryPreference) => {
+    const isSelected = selectedCategories.includes(category);
+
+    if (isSelected && selectedCategories.length === 1) {
+      return;
+    }
+
+    const updatedCategories = isSelected
+      ? selectedCategories.filter(
+          (selectedCategory) => selectedCategory !== category,
+        )
+      : [...selectedCategories, category];
+
+    setCategories(updatedCategories);
+  };
 
   const handleSearchChange = (text: string) => {
     setSearchQuery(text);
@@ -521,17 +553,22 @@ export default function FindScreen() {
           {!selectedPlace ? (
             <View style={styles.filters}>
               {categoryFilters.map((filter) => {
-                const isSelected = selectedCategory === filter.id;
+                const isSelected = selectedCategories.includes(filter.id);
 
                 return (
                   <Pressable
                     key={filter.id}
                     accessibilityRole="button"
                     accessibilityState={{ selected: isSelected }}
-                    onPress={() => setSelectedCategory(filter.id)}
+                    onPress={() => toggleCategory(filter.id)}
                     style={[
                       styles.filterChip,
-                      isSelected ? styles.filterChipSelected : null,
+                      isSelected
+                        ? {
+                            backgroundColor: filter.color,
+                            borderColor: filter.color,
+                          }
+                        : null,
                     ]}
                   >
                     <Text
@@ -554,14 +591,17 @@ export default function FindScreen() {
 
               <View style={styles.filters}>
                 {budgetFilters.map((filter) => {
-                  const isSelected = selectedBudget === filter.value;
+                  const isSelected = activeBudget === filter.value;
 
                   return (
                     <Pressable
                       key={filter.label}
                       accessibilityRole="button"
                       accessibilityState={{ selected: isSelected }}
-                      onPress={() => setSelectedBudget(filter.value)}
+                      onPress={() => {
+                        setHasSelectedBudgetManually(true);
+                        setSelectedBudget(filter.value);
+                      }}
                       style={[
                         styles.filterChip,
                         isSelected ? styles.filterChipSelected : null,
