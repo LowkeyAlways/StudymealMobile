@@ -13,7 +13,7 @@ import { places, type Place, type PlaceCategory } from "../../data/places";
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 import { useFavorites } from "../../contexts/FavoritesContext";
 import { getRoute, type Route } from "../../services/directions/getRoute";
@@ -23,6 +23,7 @@ import {
 } from "../../services/location/getUserLocation";
 import { routeModeLabels, type RouteMode } from "../../types/directions";
 import { UserLocationButton } from "../../components/map/UserLocationButton";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 const parisRiveGaucheRegion = {
   latitude: 48.829,
@@ -57,6 +58,11 @@ const budgetFilters: { value: BudgetFilter; label: string }[] = [
 ];
 
 export default function FindScreen() {
+
+  const { placeId } = useLocalSearchParams<{ placeId?: string }>();
+
+  const router = useRouter();
+
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -137,7 +143,7 @@ export default function FindScreen() {
     }
   };
 
-  const selectPlace = (place: Place, sheetIndex = 1) => {
+  const selectPlace = useCallback((place: Place, sheetIndex = 1) => {
     ignoreMapPressRef.current = true;
 
     setTimeout(() => {
@@ -159,7 +165,29 @@ export default function FindScreen() {
     setTimeout(() => {
       markerRefs.current[place.id]?.showCallout();
     }, 400);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (typeof placeId !== "string") {
+      return;
+    }
+
+    const placeFromHome = places.find((place) => place.id === placeId);
+
+    if (!placeFromHome) {
+      router.setParams({ placeId: undefined });
+      return;
+    }
+
+    const selectionTimeout = setTimeout(() => {
+      selectPlace(placeFromHome);
+      router.setParams({ placeId: undefined });
+    }, 0);
+
+    return () => {
+      clearTimeout(selectionTimeout);
+    };
+  }, [placeId, router, selectPlace]);
 
   const handleRequestDirections = async (
     mode: RouteMode = selectedRouteMode,
