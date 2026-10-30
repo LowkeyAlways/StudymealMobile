@@ -20,9 +20,17 @@ npm run android
 - `src/app/_layout.tsx` : le cadre de navigation commun.
 - `src/app/index.tsx` : l’écran d’accueil (`/`).
 
-## Prochaine étape
+## Identité native
 
-Créer l’écran Carte et les données de démonstration des premiers lieux de Paris Rive Gauche.
+- Le nom affiché sur iOS et Android est `Studymeal`.
+- Le schéma de lien profond est `studymeal://`.
+- L’icône iOS et web utilise `assets/studymeal-icon.png`.
+- Android utilise la même icône et son calque transparent
+  `assets/studymeal-icon-foreground.png` pour l’icône adaptative.
+- L’écran de lancement reprend le symbole Studymeal sur fond crème.
+
+L’icône et le splash screen ne s’affichent pas fidèlement dans Expo Go. Ils se
+vérifient dans une preview build ou une production build.
 
 ## Qualité et delivery
 

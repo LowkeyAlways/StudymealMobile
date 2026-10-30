@@ -8,22 +8,23 @@
     },
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/studymeal-icon.png",
+    "primaryColor": "#0C5B4C",
     "userInterfaceStyle": "light",
     "ios": {
+      "icon": "./assets/studymeal-icon.png",
       "supportsTablet": true
     },
     "android": {
+      "icon": "./assets/studymeal-icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#FBFAF5",
+        "foregroundImage": "./assets/studymeal-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/studymeal-favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -31,6 +32,14 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Studymeal utilise votre position uniquement pour calculer un itinéraire à pied vers un lieu."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBFAF5",
+          "image": "./assets/studymeal-icon-foreground.png",
+          "imageWidth": 180
         }
       ]
     ]
