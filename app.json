@@ -12,6 +12,7 @@
     "primaryColor": "#0C5B4C",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.lowkeyalways.studymeal",
       "icon": "./assets/studymeal-icon.png",
       "supportsTablet": true
     },
