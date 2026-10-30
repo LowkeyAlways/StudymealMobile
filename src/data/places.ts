@@ -1,3 +1,5 @@
+import type { Campus } from "../types/preferences";
+
 export type PlaceCategory = "crous" | "solidaire" | "bon-plan";
 export type PlaceVerificationStatus = "verified" | "to-verify";
 
@@ -5,6 +7,7 @@ export type Place = {
   id: string;
   name: string;
   category: PlaceCategory;
+  campuses: Campus[];
   priceLabel: string;
   budgetAmount: number;
   address: string;
@@ -24,6 +27,7 @@ export const places: Place[] = [
     id: "ru-halle-aux-farines",
     name: "RU Halle aux Farines",
     category: "crous",
+    campuses: ["Université Paris Cité – Grands Moulins"],
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "3 esplanade Pierre Vidal-Naquet, 75013 Paris",
@@ -44,6 +48,7 @@ export const places: Place[] = [
     id: "agorae-paris-13",
     name: "AGORAé Paris 13",
     category: "solidaire",
+    campuses: ["Université Paris Cité – Grands Moulins"],
     priceLabel: "Tarif solidaire",
     budgetAmount: 3,
     address: "3 allée Paris-Ivry, 75013 Paris",
@@ -63,6 +68,7 @@ export const places: Place[] = [
     id: "ru-mabillon",
     name: "RU Mabillon",
     category: "crous",
+    campuses: ["Sorbonne Université – Jussieu"],
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "3 rue Mabillon, 75006 Paris",
@@ -79,6 +85,7 @@ export const places: Place[] = [
     id: "ru-bullier",
     name: "RU Bullier",
     category: "crous",
+    campuses: ["Sorbonne Université – Jussieu", "Autre campus"],
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "39 avenue Georges Bernanos, 75005 Paris",
@@ -95,6 +102,7 @@ export const places: Place[] = [
     id: "ru-cuvier-jussieu-censier",
     name: "RU Cuvier-Jussieu / Censier",
     category: "crous",
+    campuses: ["Sorbonne Université – Jussieu"],
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "8 rue Cuvier, 75005 Paris",
@@ -111,6 +119,7 @@ export const places: Place[] = [
     id: "ru-citeaux",
     name: "RU Cîteaux",
     category: "crous",
+    campuses: ["Autre campus"],
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "45 boulevard Diderot, 75012 Paris",
@@ -127,6 +136,7 @@ export const places: Place[] = [
     id: "la-cop1ne",
     name: "La Cop1ne",
     category: "solidaire",
+    campuses: ["Autre campus"],
     priceLabel: "Tarif solidaire",
     budgetAmount: 3,
     address: "1 place Alice Guy, 75014 Paris",
@@ -143,6 +153,7 @@ export const places: Place[] = [
     id: "linkee-esspace",
     name: "Linkee – ESS'Pace",
     category: "solidaire",
+    campuses: ["Université Paris Cité – Grands Moulins"],
     priceLabel: "Gratuit",
     budgetAmount: 0,
     address: "15 rue Jean-Antoine de Baïf, 75013 Paris",
@@ -159,6 +170,7 @@ export const places: Place[] = [
     id: "linkee-smart-food",
     name: "Linkee – Smart Food",
     category: "solidaire",
+    campuses: ["Autre campus"],
     priceLabel: "Gratuit",
     budgetAmount: 0,
     address: "80 rue des Haies, 75020 Paris",
@@ -175,6 +187,7 @@ export const places: Place[] = [
     id: "cop1-mie-bastille",
     name: "Cop1 – MIE Bastille",
     category: "solidaire",
+    campuses: ["Autre campus"],
     priceLabel: "Gratuit",
     budgetAmount: 0,
     address: "50 rue des Tournelles, 75003 Paris",
@@ -191,6 +204,7 @@ export const places: Place[] = [
     id: "cop1-les-amarres",
     name: "Cop1 – Les Amarres",
     category: "solidaire",
+    campuses: ["Université Paris Cité – Grands Moulins"],
     priceLabel: "Gratuit",
     budgetAmount: 0,
     address: "24 quai d’Austerlitz, 75013 Paris",
@@ -207,6 +221,7 @@ export const places: Place[] = [
     id: "delice-house-traiteur",
     name: "Délice House Traiteur",
     category: "bon-plan",
+    campuses: ["Autre campus"],
     priceLabel: "Bon plan étudiant",
     budgetAmount: 6.5,
     address: "81 rue Saint-Antoine, 75004 Paris",

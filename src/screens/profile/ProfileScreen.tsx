@@ -11,12 +11,12 @@ import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useFavorites } from "../../contexts/FavoritesContext";
+import { usePreferences } from "../../contexts/PreferencesContext";
 import {
   budgetOptions,
   campusOptions,
   categoryOptions,
-  usePreferences,
-} from "../../contexts/PreferencesContext";
+} from "../../types/preferences";
 import { styles } from "../../styles/screens/profile.styles";
 import { colors } from "../../styles/theme/colors";
 

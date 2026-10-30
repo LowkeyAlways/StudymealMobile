@@ -32,10 +32,12 @@ import {
 } from "../../services/location/getUserLocation";
 import { routeModeLabels, type RouteMode } from "../../types/directions";
 import { UserLocationButton } from "../../components/map/UserLocationButton";
+import { usePreferences } from "../../contexts/PreferencesContext";
 import {
+  budgetOptions,
+  categoryOptions,
   type CategoryPreference,
-  usePreferences,
-} from "../../contexts/PreferencesContext";
+} from "../../types/preferences";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 const parisRiveGaucheRegion = {
@@ -94,6 +96,15 @@ export default function FindScreen() {
   const [hasSelectedBudgetManually, setHasSelectedBudgetManually] =
     useState(false);
 
+  const [selectedCategories, setSelectedCategories] = useState<
+    CategoryPreference[]
+  >(categoryOptions.map((option) => option.value));
+
+  const [hasSelectedCategoriesManually, setHasSelectedCategoriesManually] =
+    useState(false);
+
+  const [showAllCampuses, setShowAllCampuses] = useState(false);
+
   const [walkingRoute, setWalkingRoute] = useState<Route | null>(null);
 
   const [isRouteLoading, setIsRouteLoading] = useState(false);
@@ -121,8 +132,8 @@ export default function FindScreen() {
   const {
     isPreferencesLoading,
     selectedBudget: preferredBudget,
-    selectedCategories,
-    setCategories,
+    selectedCategories: preferredCategories,
+    selectedCampus,
   } = usePreferences();
 
   const selectedPlace = places.find((place) => place.id === selectedPlaceId);
@@ -134,8 +145,18 @@ export default function FindScreen() {
       ? preferredBudget
       : selectedBudget;
 
-  const categoryFilteredPlaces = places.filter((place) => {
-    return selectedCategories.includes(place.category);
+  const activeCategories =
+    !isPreferencesLoading && !hasSelectedCategoriesManually
+      ? preferredCategories
+      : selectedCategories;
+
+  const campusFilteredPlaces =
+    selectedCampus !== null && !showAllCampuses
+      ? places.filter((place) => place.campuses.includes(selectedCampus))
+      : places;
+
+  const categoryFilteredPlaces = campusFilteredPlaces.filter((place) => {
+    return activeCategories.includes(place.category);
   });
 
   const budgetFilteredPlaces = categoryFilteredPlaces.filter((place) => {
@@ -167,20 +188,38 @@ export default function FindScreen() {
         ? "1 lieu trouvé"
         : `${resultCount} lieux trouvés`;
 
-  const toggleCategory = (category: CategoryPreference) => {
-    const isSelected = selectedCategories.includes(category);
+  const activeBudgetLabel =
+    budgetOptions.find((option) => option.value === activeBudget)?.label ??
+    "Tous budgets";
 
-    if (isSelected && selectedCategories.length === 1) {
+  const activeCategoriesLabel =
+    activeCategories.length === categoryOptions.length
+      ? "Toutes catégories"
+      : categoryOptions
+          .filter((option) => activeCategories.includes(option.value))
+          .map((option) => option.label)
+          .join(" · ");
+
+  const hasTemporaryFilters =
+    hasSelectedBudgetManually ||
+    hasSelectedCategoriesManually ||
+    showAllCampuses;
+
+  const toggleCategory = (category: CategoryPreference) => {
+    const isSelected = activeCategories.includes(category);
+
+    if (isSelected && activeCategories.length === 1) {
       return;
     }
 
     const updatedCategories = isSelected
-      ? selectedCategories.filter(
+      ? activeCategories.filter(
           (selectedCategory) => selectedCategory !== category,
         )
-      : [...selectedCategories, category];
+      : [...activeCategories, category];
 
-    setCategories(updatedCategories);
+    setHasSelectedCategoriesManually(true);
+    setSelectedCategories(updatedCategories);
   };
 
   const handleSearchChange = (text: string) => {
@@ -381,7 +420,10 @@ export default function FindScreen() {
   const visibleMapPlaces =
     (walkingRoute || isRouteLoading) && selectedPlace
       ? [selectedPlace]
-      : budgetFilteredPlaces;
+      : selectedPlace &&
+          !budgetFilteredPlaces.some((place) => place.id === selectedPlace.id)
+        ? [...budgetFilteredPlaces, selectedPlace]
+        : budgetFilteredPlaces;
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
@@ -551,9 +593,53 @@ export default function FindScreen() {
             ) : null}
           </View>
           {!selectedPlace ? (
+            <View style={styles.profileFiltersHint}>
+              <View>
+                <Text style={styles.profileFiltersHintEyebrow}>
+                  FILTRES ACTIFS
+                </Text>
+                <Text style={styles.profileFiltersHintText}>
+                  {activeCategoriesLabel} · {activeBudgetLabel}
+                </Text>
+              </View>
+              {hasTemporaryFilters ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    setHasSelectedBudgetManually(false);
+                    setHasSelectedCategoriesManually(false);
+                    setShowAllCampuses(false);
+                  }}
+                  style={styles.resetFiltersButton}
+                >
+                  <Text style={styles.resetFiltersButtonText}>Réinitialiser</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+          {!selectedPlace && selectedCampus ? (
+            <View style={styles.campusFilterCard}>
+              <View style={styles.campusFilterCopy}>
+                <Text style={styles.campusFilterEyebrow}>CAMPUS</Text>
+                <Text style={styles.campusFilterTitle}>
+                  {showAllCampuses ? "Tous les campus" : selectedCampus}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setShowAllCampuses((isShowingAll) => !isShowingAll)}
+                style={styles.campusFilterButton}
+              >
+                <Text style={styles.campusFilterButtonText}>
+                  {showAllCampuses ? "Mon campus" : "Tout voir"}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+          {!selectedPlace ? (
             <View style={styles.filters}>
               {categoryFilters.map((filter) => {
-                const isSelected = selectedCategories.includes(filter.id);
+                const isSelected = activeCategories.includes(filter.id);
 
                 return (
                   <Pressable
