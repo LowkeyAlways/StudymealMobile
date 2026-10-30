@@ -30,6 +30,18 @@ function formatVerifiedAt(verifiedAt: string) {
   }).format(new Date(`${verifiedAt}T12:00:00`));
 }
 
+function getSourceStatus(place: Place) {
+  if (place.verificationStatus === "to-verify") {
+    return `Source indiquée : ${place.sourceName} · informations à vérifier`;
+  }
+
+  if (place.verifiedAt) {
+    return `Source officielle : ${place.sourceName} · vérifié le ${formatVerifiedAt(place.verifiedAt)}`;
+  }
+
+  return `Source indiquée : ${place.sourceName} · signalée comme vérifiée`;
+}
+
 export function PlaceDetails({
   isFavorite,
   onToggleFavorite,
@@ -115,10 +127,10 @@ export function PlaceDetails({
         <Text style={styles.content}>{place.practicalInfo}</Text>
       </View>
       <Text style={styles.verificationText}>
-        Source officielle · vérifié le {formatVerifiedAt(place.verifiedAt)}
+        {getSourceStatus(place)}
       </Text>
       <Pressable
-        accessibilityLabel={`Consulter la source officielle de ${place.name}`}
+        accessibilityLabel={`Consulter la source de ${place.name}`}
         accessibilityRole="link"
         onPress={() => void Linking.openURL(place.sourceUrl)}
         style={styles.sourceLink}
