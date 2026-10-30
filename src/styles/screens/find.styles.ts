@@ -96,13 +96,18 @@ export const styles = StyleSheet.create({
     borderColor: '#DDE5DF',
     borderRadius: 14,
     borderWidth: 1,
+    maxHeight: 234,
     overflow: 'hidden',
+  },
+  suggestionsContent: {
+    flexGrow: 0,
   },
   suggestion: {
     borderBottomColor: '#E8EEEA',
     borderBottomWidth: 1,
+    height: 78,
+    justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 14,
   },
   suggestionName: {
     color: colors.text,

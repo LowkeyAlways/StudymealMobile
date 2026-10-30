@@ -1,6 +1,7 @@
 import {
   Keyboard,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -8,12 +9,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline, type MapMarker } from "react-native-maps";
+import ClusteredMapView from "react-native-map-clustering";
 import { styles } from "../../styles/screens/find.styles";
 import { places, type Place, type PlaceCategory } from "../../data/places";
 import { PlaceCard } from "../../components/places/PlaceCard";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "../../styles/theme/colors";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type ComponentProps,
+  type ComponentType,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 import { useFavorites } from "../../contexts/FavoritesContext";
 import { getRoute, type Route } from "../../services/directions/getRoute";
@@ -57,6 +66,12 @@ const budgetFilters: { value: BudgetFilter; label: string }[] = [
   { value: 10, label: "≤ 10 €" },
 ];
 
+type NonClusteredMarkerProps = ComponentProps<typeof Marker> & {
+  cluster: false;
+};
+
+const NonClusteredMarker = Marker as unknown as ComponentType<NonClusteredMarkerProps>;
+
 export default function FindScreen() {
 
   const { placeId } = useLocalSearchParams<{ placeId?: string }>();
@@ -66,6 +81,8 @@ export default function FindScreen() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("all");
@@ -149,6 +166,7 @@ export default function FindScreen() {
     setTimeout(() => {
       ignoreMapPressRef.current = false;
     }, 100);
+    setIsSearchActive(false);
     setWalkingRoute(null);
     setSelectedPlaceId(place.id);
     bottomSheetRef.current?.snapToIndex(sheetIndex);
@@ -310,7 +328,6 @@ export default function FindScreen() {
     setSelectedRouteMode(mode);
 
     if (hasActiveRoute) {
-      setWalkingRoute(null);
       void handleRequestDirections(mode);
     }
   };
@@ -336,9 +353,16 @@ export default function FindScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
-      <MapView
+      <ClusteredMapView
+        clusterColor={colors.brand}
+        clusterTextColor={colors.white}
+        edgePadding={{ bottom: 450, left: 100, right: 100, top: 140 }}
         ref={mapRef}
         initialRegion={parisRiveGaucheRegion}
+        minPoints={2}
+        radius={18}
+        spiralEnabled
+        spiderLineColor={colors.brand}
         style={styles.map}
         onPress={() => {
           if (ignoreMapPressRef.current) {
@@ -347,6 +371,7 @@ export default function FindScreen() {
 
           searchInputRef.current?.blur();
           Keyboard.dismiss();
+          setIsSearchActive(false);
 
           if (selectedPlaceId !== null) {
             markerRefs.current[selectedPlaceId]?.hideCallout();
@@ -358,26 +383,28 @@ export default function FindScreen() {
         }}
       >
         {userLocation ? (
-          <Marker
+          <NonClusteredMarker
             anchor={{ x: 0.5, y: 0.5 }}
+            cluster={false}
             coordinate={userLocation}
             zIndex={40}
           >
             <View style={styles.userLocationMarker}>
               <View style={styles.userLocationMarkerCore} />
             </View>
-          </Marker>
+          </NonClusteredMarker>
         ) : null}
         {routeStart ? (
-          <Marker
+          <NonClusteredMarker
             anchor={{ x: 0.5, y: 0.5 }}
+            cluster={false}
             coordinate={routeStart}
             zIndex={20}
           >
             <View style={styles.routeStartMarker}>
               <View style={styles.routeStartMarkerCore} />
             </View>
-          </Marker>
+          </NonClusteredMarker>
         ) : null}
         {walkingRoute ? (
           <Polyline
@@ -388,15 +415,16 @@ export default function FindScreen() {
         ) : null}
 
         {routeSummaryCoordinate && routeSummary ? (
-          <Marker
+          <NonClusteredMarker
             anchor={{ x: 0.5, y: 0.5 }}
+            cluster={false}
             coordinate={routeSummaryCoordinate}
             zIndex={30}
           >
             <View style={styles.routeSummaryMarker}>
               <Text style={styles.routeSummaryMarkerText}>{routeSummary}</Text>
             </View>
-          </Marker>
+          </NonClusteredMarker>
         ) : null}
         {visibleMapPlaces.map((place) => {
           const isSelected = selectedPlaceId === place.id;
@@ -419,7 +447,7 @@ export default function FindScreen() {
             ></Marker>
           );
         })}
-      </MapView>
+      </ClusteredMapView>
 
       <UserLocationButton
         isLoading={isLocatingUser}
@@ -443,15 +471,24 @@ export default function FindScreen() {
               autoCapitalize="none"
               ref={searchInputRef}
               onChangeText={handleSearchChange}
-              onFocus={() => bottomSheetRef.current?.snapToIndex(2)}
+              onFocus={() => {
+                setIsSearchActive(true);
+                bottomSheetRef.current?.snapToIndex(2);
+              }}
               placeholder="Rechercher un lieu"
               placeholderTextColor={colors.textMuted}
               style={styles.searchInput}
               value={searchQuery}
             />
 
-            {normalizedSearchQuery.length > 0 ? (
-              <View style={styles.suggestions}>
+            {isSearchActive && normalizedSearchQuery.length > 0 ? (
+              <ScrollView
+                contentContainerStyle={styles.suggestionsContent}
+                keyboardShouldPersistTaps="handled"
+                nestedScrollEnabled
+                showsVerticalScrollIndicator
+                style={styles.suggestions}
+              >
                 {filteredPlaces.length > 0 ? (
                   filteredPlaces.map((place) => (
                     <Pressable
@@ -461,12 +498,14 @@ export default function FindScreen() {
                       onPress={() => {
                         searchInputRef.current?.blur();
                         setSearchQuery("");
-                        selectPlace(place, 0);
+                        selectPlace(place);
                       }}
                       style={styles.suggestion}
                     >
-                      <Text style={styles.suggestionName}>{place.name}</Text>
-                      <Text style={styles.suggestionDetails}>
+                      <Text numberOfLines={1} style={styles.suggestionName}>
+                        {place.name}
+                      </Text>
+                      <Text numberOfLines={1} style={styles.suggestionDetails}>
                         {place.priceLabel} · {place.address}
                       </Text>
                     </Pressable>
@@ -476,7 +515,7 @@ export default function FindScreen() {
                     Aucun lieu ne correspond à cette recherche.
                   </Text>
                 )}
-              </View>
+              </ScrollView>
             ) : null}
           </View>
           {!selectedPlace ? (
