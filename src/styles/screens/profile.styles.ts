@@ -75,7 +75,7 @@ export const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: colors.white,
-    borderColor: "#DDE5DF",
+    borderColor: colors.border,
     borderRadius: 18,
     borderWidth: 1,
     marginTop: 16,
@@ -108,7 +108,7 @@ export const styles = StyleSheet.create({
   },
   preferencesCard: {
     backgroundColor: colors.white,
-    borderColor: "#DDE5DF",
+    borderColor: colors.border,
     borderRadius: 18,
     borderWidth: 1,
     marginTop: 12,
@@ -126,7 +126,7 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   preferenceRowBorder: {
-    borderBottomColor: "#E8EEEA",
+    borderBottomColor: colors.divider,
     borderBottomWidth: 1,
   },
   preferenceLabel: {
@@ -175,7 +175,7 @@ export const styles = StyleSheet.create({
   },
   modalBackdrop: {
     alignItems: "center",
-    backgroundColor: "rgba(22, 50, 45, 0.36)",
+    backgroundColor: "rgba(9, 18, 55, 0.36)",
     flex: 1,
     justifyContent: "flex-end",
     padding: 20,
@@ -210,7 +210,7 @@ export const styles = StyleSheet.create({
   },
   campusOption: {
     backgroundColor: colors.white,
-    borderColor: "#DDE5DF",
+    borderColor: colors.border,
     borderRadius: 14,
     borderWidth: 1,
     padding: 15,

@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.white,
-    borderColor: "#DDE5DF",
+    borderColor: colors.border,
     borderRadius: 18,
     borderWidth: 1,
     padding: 18,

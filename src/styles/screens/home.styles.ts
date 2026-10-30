@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
   },
   contextCard: {
     backgroundColor: colors.white,
-    borderColor: "#E2E9E5",
+    borderColor: colors.border,
     borderRadius: 20,
     borderWidth: 1,
     marginTop: 16,
@@ -147,7 +147,7 @@ export const styles = StyleSheet.create({
     marginTop: 3,
   },
   contextDivider: {
-    backgroundColor: "#E2E9E5",
+    backgroundColor: colors.border,
     height: 38,
     marginHorizontal: 16,
     width: 1,
@@ -159,7 +159,7 @@ export const styles = StyleSheet.create({
     marginTop: 16,
   },
   featuredCard: {
-    borderColor: "#E2E9E5",
+    borderColor: colors.border,
     borderRadius: 20,
     borderWidth: 1,
     marginTop: 16,

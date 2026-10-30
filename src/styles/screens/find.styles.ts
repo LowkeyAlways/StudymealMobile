@@ -42,7 +42,7 @@ export const styles = StyleSheet.create({
   },
   handle: {
     alignSelf: "center",
-    backgroundColor: "#B8C6BE",
+    backgroundColor: colors.control,
     borderRadius: 4,
     height: 5,
     marginBottom: 18,
@@ -83,7 +83,7 @@ export const styles = StyleSheet.create({
   },
   searchInput: {
     backgroundColor: colors.white,
-    borderColor: '#DDE5DF',
+    borderColor: colors.border,
     borderRadius: 14,
     borderWidth: 1,
     color: colors.text,
@@ -93,7 +93,7 @@ export const styles = StyleSheet.create({
   },
   suggestions: {
     backgroundColor: colors.white,
-    borderColor: '#DDE5DF',
+    borderColor: colors.border,
     borderRadius: 14,
     borderWidth: 1,
     maxHeight: 234,
@@ -103,7 +103,7 @@ export const styles = StyleSheet.create({
     flexGrow: 0,
   },
   suggestion: {
-    borderBottomColor: '#E8EEEA',
+    borderBottomColor: colors.divider,
     borderBottomWidth: 1,
     height: 78,
     justifyContent: 'center',
@@ -203,7 +203,7 @@ export const styles = StyleSheet.create({
   },
   filterChip: {
     backgroundColor: colors.white,
-    borderColor: '#DDE5DF',
+    borderColor: colors.border,
     borderRadius: 999,
     borderWidth: 1,
     paddingHorizontal: 13,
@@ -241,7 +241,7 @@ export const styles = StyleSheet.create({
     fontWeight: '800',
   },
   emptyCategoryState: {
-    backgroundColor: '#EAF3EE',
+    backgroundColor: colors.goldSoft,
     borderRadius: 18,
     marginTop: 18,
     padding: 18,
@@ -272,7 +272,7 @@ export const styles = StyleSheet.create({
   },
   routeStartMarker: {
     alignItems: "center",
-    backgroundColor: "rgba(12, 91, 76, 0.22)",
+    backgroundColor: colors.brandTransparent,
     borderRadius: 20,
     height: 40,
     justifyContent: "center",
@@ -307,14 +307,14 @@ export const styles = StyleSheet.create({
   },
   userLocationMarker: {
     alignItems: "center",
-    backgroundColor: "rgba(0, 122, 255, 0.22)",
+    backgroundColor: colors.locationBlueTransparent,
     borderRadius: 18,
     height: 36,
     justifyContent: "center",
     width: 36,
   },
   userLocationMarkerCore: {
-    backgroundColor: "#007AFF",
+    backgroundColor: colors.locationBlue,
     borderColor: colors.white,
     borderRadius: 10,
     borderWidth: 3,

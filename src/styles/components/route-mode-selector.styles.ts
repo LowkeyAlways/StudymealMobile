@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    borderColor: "#D8E3DD",
+    borderColor: colors.border,
     borderRadius: 999,
     borderWidth: 1,
     flex: 1,

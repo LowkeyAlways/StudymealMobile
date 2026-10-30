@@ -146,7 +146,7 @@ export default function ProfileScreen() {
                 accessibilityLabel="Activer les notifications"
                 onValueChange={setNotificationsEnabled}
                 thumbColor={colors.white}
-                trackColor={{ false: "#C9D3CD", true: colors.brand }}
+                trackColor={{ false: colors.switchInactive, true: colors.brand }}
                 value={notificationsEnabled}
               />
             </View>

@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
     marginTop: 8,
   },
   practicalCard: {
-    backgroundColor: '#EAF3EE',
+    backgroundColor: colors.goldSoft,
     borderRadius: 18,
     marginTop: 20,
     padding: 18,

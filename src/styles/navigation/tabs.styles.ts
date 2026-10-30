@@ -10,6 +10,6 @@ export const tabBarOptions = {
   },
   tabBarStyle: {
     backgroundColor: colors.background,
-    borderTopColor: '#DDE5DF',
+    borderTopColor: colors.border,
   },
 };
