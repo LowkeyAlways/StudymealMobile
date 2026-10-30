@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import type { Place } from "../../data/places";
 import { styles } from "../../styles/components/place-details.styles";
 import { RouteModeSelector } from "../directions/RouteModeSelector";
@@ -21,6 +21,14 @@ const categoryLabels: Record<Place["category"], string> = {
   solidaire: "SOLIDAIRE",
   "bon-plan": "BON PLAN",
 };
+
+function formatVerifiedAt(verifiedAt: string) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(`${verifiedAt}T12:00:00`));
+}
 
 export function PlaceDetails({
   isFavorite,
@@ -106,6 +114,17 @@ export function PlaceDetails({
         <Text style={styles.sectionLabel}>INFOS PRATIQUES</Text>
         <Text style={styles.content}>{place.practicalInfo}</Text>
       </View>
+      <Text style={styles.verificationText}>
+        Source officielle · vérifié le {formatVerifiedAt(place.verifiedAt)}
+      </Text>
+      <Pressable
+        accessibilityLabel={`Consulter la source officielle de ${place.name}`}
+        accessibilityRole="link"
+        onPress={() => void Linking.openURL(place.sourceUrl)}
+        style={styles.sourceLink}
+      >
+        <Text style={styles.sourceLinkText}>Consulter la source</Text>
+      </Pressable>
     </View>
   );
 }

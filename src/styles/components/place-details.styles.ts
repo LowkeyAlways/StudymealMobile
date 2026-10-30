@@ -95,4 +95,19 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
   },
+  verificationText: {
+    color: colors.textMuted,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 16,
+  },
+  sourceLink: {
+    alignSelf: "flex-start",
+    marginTop: 6,
+  },
+  sourceLinkText: {
+    color: colors.brand,
+    fontSize: 12,
+    fontWeight: "800",
+  },
 });
