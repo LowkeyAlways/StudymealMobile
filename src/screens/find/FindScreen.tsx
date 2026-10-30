@@ -42,14 +42,14 @@ type CategoryFilter = PlaceCategory | "all";
 
 type BudgetFilter = number | "all";
 
-const categoryFilters: Array<{ id: CategoryFilter; label: string }> = [
+const categoryFilters: { id: CategoryFilter; label: string }[] = [
   { id: "all", label: "Tous" },
   { id: "crous", label: "CROUS" },
   { id: "solidaire", label: "Solidaire" },
   { id: "bon-plan", label: "Bon plan" },
 ];
 
-const budgetFilters: Array<{ value: BudgetFilter; label: string }> = [
+const budgetFilters: { value: BudgetFilter; label: string }[] = [
   { value: "all", label: "Tous budgets" },
   { value: 3, label: "≤ 3 €" },
   { value: 6, label: "≤ 6 €" },

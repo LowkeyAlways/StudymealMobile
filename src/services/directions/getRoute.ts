@@ -13,13 +13,13 @@ export type RouteResult =
   | { status: "unavailable" };
 
 type MapboxDirectionsResponse = {
-  routes?: Array<{
+  routes?: {
     distance: number;
     duration: number;
     geometry: {
-      coordinates: Array<[number, number]>;
+      coordinates: [number, number][];
     };
-  }>;
+  }[];
 };
 
 export async function getRoute(
