@@ -6,7 +6,8 @@ import { useFavorites } from "../../contexts/FavoritesContext";
 import { styles } from "../../styles/screens/favorites.styles";
 
 export default function FavoritesScreen() {
-  const { favoritePlaceIds, toggleFavorite } = useFavorites();
+  const { favoritePlaceIds, isFavoritesLoading, toggleFavorite } =
+    useFavorites();
 
   const favoritePlaces = places.filter((place) =>
     favoritePlaceIds.includes(place.id),
@@ -21,12 +22,21 @@ export default function FavoritesScreen() {
           Retrouve ici les adresses que tu as enregistrées.
         </Text>
 
-        {favoritePlaces.length === 0 ? (
+        {isFavoritesLoading ? (
           <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Aucun lieu favori pour le moment</Text>
+            <Text style={styles.emptyTitle}>Chargement de tes favoris…</Text>
             <Text style={styles.emptyDescription}>
-              Depuis la fiche d’un lieu, utilise « Ajouter aux favoris » pour
-              le retrouver ici.
+              Nous restaurons tes adresses enregistrées.
+            </Text>
+          </View>
+        ) : favoritePlaces.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>
+              Aucun lieu favori pour le moment
+            </Text>
+            <Text style={styles.emptyDescription}>
+              Depuis la fiche d’un lieu, utilise « Ajouter aux favoris » pour le
+              retrouver ici.
             </Text>
           </View>
         ) : (
