@@ -24,10 +24,11 @@ import { styles } from "../../styles/screens/profile.styles";
 import { colors } from "../../styles/theme/colors";
 import { getUserDisplayName, getUserInitial } from "../../services/auth/userProfile";
 import { navigationAppLabels } from "../../types/navigation";
+import { places } from '../../data/places';
 
 export default function ProfileScreen() {
   const { isAuthLoading, user, signOut } = useAuth();
-  const { favoritePlaceIds, isFavoritesLoading } = useFavorites();
+  const { favoritePlaceIds, isFavoritesLoading, toggleFavorite } = useFavorites();
   const {
     isPreferencesLoading,
     selectedBudget,
@@ -86,6 +87,9 @@ export default function ProfileScreen() {
     : favoritePlaceIds.length === 1
       ? "1 lieu enregistré"
       : `${favoritePlaceIds.length} lieux enregistrés`;
+  const favoritePlaces = places.filter((place) =>
+    favoritePlaceIds.includes(place.id),
+  );
   const profileName = user === null ? "Créer ou connecter un compte" : getUserDisplayName(user);
   const profileInitial = user === null ? "S" : getUserInitial(user);
 
@@ -142,6 +146,51 @@ export default function ProfileScreen() {
             Tes favoris restent enregistrés sur cet appareil.
           </Text>
         </View>
+
+        <Text style={styles.sectionLabel}>MES FAVORIS</Text>
+        {isFavoritesLoading ? (
+          <View style={styles.favoritesCard}>
+            <Text style={styles.favoriteEmptyText}>Chargement de tes favoris…</Text>
+          </View>
+        ) : favoritePlaces.length === 0 ? (
+          <View style={styles.favoritesCard}>
+            <Text style={styles.favoriteEmptyTitle}>Aucun lieu enregistré</Text>
+            <Text style={styles.favoriteEmptyText}>
+              Ajoute un lieu depuis sa fiche pour le retrouver rapidement ici.
+            </Text>
+          </View>
+        ) : (
+          <View style={styles.favoriteList}>
+            {favoritePlaces.map((place) => (
+              <View key={place.id} style={styles.favoritesCard}>
+                <Text style={styles.favoriteCategory}>{place.category.toUpperCase()}</Text>
+                <Text style={styles.favoriteName}>{place.name}</Text>
+                <Text style={styles.favoriteDetails}>
+                  {place.priceLabel} · {place.address}
+                </Text>
+                <View style={styles.favoriteActions}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() =>
+                      router.navigate({ pathname: '/map', params: { placeId: place.id } })
+                    }
+                    style={styles.favoriteMapButton}
+                  >
+                    <Text style={styles.favoriteMapButtonText}>Voir sur la carte</Text>
+                  </Pressable>
+                  <Pressable
+                    accessibilityLabel={`Retirer ${place.name} des favoris`}
+                    accessibilityRole="button"
+                    onPress={() => toggleFavorite(place.id)}
+                    style={styles.favoriteRemoveButton}
+                  >
+                    <Text style={styles.favoriteRemoveButtonText}>Retirer</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
         <Text style={styles.sectionLabel}>PRÉFÉRENCES</Text>
         <View style={styles.preferencesCard}>

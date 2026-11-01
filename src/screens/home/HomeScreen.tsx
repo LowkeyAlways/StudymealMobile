@@ -108,7 +108,7 @@ export default function HomeScreen() {
         <Pressable
           accessibilityLabel="Voir mes favoris"
           accessibilityRole="button"
-          onPress={() => router.navigate("/favorites")}
+          onPress={() => router.navigate('/profile')}
           style={styles.secondaryAction}
         >
           <Text style={styles.secondaryActionText}>Voir mes favoris</Text>

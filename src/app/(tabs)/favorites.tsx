@@ -1,2 +1,2 @@
-// Fichier de route : l'interface vit dans src/screens/favorites.
-export { default } from '../../screens/favorites/FavoritesScreen';
+// Fichier de route : l'interface vit dans src/screens/deals.
+export { default } from '../../screens/deals/DealsScreen';
