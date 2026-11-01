@@ -4,6 +4,8 @@ export default ({ config }: ConfigContext) => ({
   ...config,
   plugins: [
     ...(config.plugins ?? []),
+    "expo-dev-client",
+    "expo-secure-store",
     [
       "react-native-maps",
       {

@@ -14,7 +14,11 @@
     "ios": {
       "bundleIdentifier": "com.lowkeyalways.studymeal",
       "icon": "./assets/studymeal-icon.png",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["comgooglemaps"]
+      }
     },
     "android": {
       "icon": "./assets/studymeal-icon.png",

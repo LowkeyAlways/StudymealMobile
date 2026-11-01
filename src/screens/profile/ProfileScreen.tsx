@@ -6,10 +6,13 @@ import {
   Switch,
   Text,
   View,
+  Platform,
 } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
+import { useAuth } from "../../contexts/AuthContext";
 import { useFavorites } from "../../contexts/FavoritesContext";
 import { usePreferences } from "../../contexts/PreferencesContext";
 import {
@@ -19,8 +22,11 @@ import {
 } from "../../types/preferences";
 import { styles } from "../../styles/screens/profile.styles";
 import { colors } from "../../styles/theme/colors";
+import { getUserDisplayName, getUserInitial } from "../../services/auth/userProfile";
+import { navigationAppLabels } from "../../types/navigation";
 
 export default function ProfileScreen() {
+  const { isAuthLoading, user, signOut } = useAuth();
   const { favoritePlaceIds, isFavoritesLoading } = useFavorites();
   const {
     isPreferencesLoading,
@@ -32,11 +38,15 @@ export default function ProfileScreen() {
     setCampus,
     setCategories,
     setNotificationsEnabled,
+    selectedNavigationApp,
+    setNavigationApp,
     resetPreferences,
   } = usePreferences();
   const [isCampusPickerVisible, setIsCampusPickerVisible] = useState(false);
   const [isBudgetPickerVisible, setIsBudgetPickerVisible] = useState(false);
   const [isCategoryPickerVisible, setIsCategoryPickerVisible] =
+    useState(false);
+  const [isNavigationAppPickerVisible, setIsNavigationAppPickerVisible] =
     useState(false);
 
   const selectedBudgetLabel = budgetOptions.find(
@@ -76,6 +86,8 @@ export default function ProfileScreen() {
     : favoritePlaceIds.length === 1
       ? "1 lieu enregistré"
       : `${favoritePlaceIds.length} lieux enregistrés`;
+  const profileName = user === null ? "Créer ou connecter un compte" : getUserDisplayName(user);
+  const profileInitial = user === null ? "S" : getUserInitial(user);
 
   return (
     <SafeAreaView style={styles.screen} edges={["top"]}>
@@ -90,19 +102,38 @@ export default function ProfileScreen() {
           correspondent à ton quotidien.
         </Text>
 
-        <View style={styles.profileCard}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => {
+            if (user === null) {
+              router.push("../auth");
+              return;
+            }
+
+            void signOut().catch(() => {
+              Alert.alert("Déconnexion impossible", "Réessaie dans un instant.");
+            });
+          }}
+          style={styles.profileCard}
+        >
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>S</Text>
+            <Text style={styles.avatarText}>{profileInitial}</Text>
           </View>
 
           <View style={styles.profileCopy}>
             <Text style={styles.profileEyebrow}>PROFIL LOCAL</Text>
-            <Text style={styles.profileTitle}>Ton expérience Studymeal</Text>
+            <Text style={styles.profileTitle}>
+              {isAuthLoading
+                ? "Chargement du compte…"
+                : profileName}
+            </Text>
             <Text style={styles.profileDescription}>
-              Aucun compte n’est nécessaire pour commencer.
+              {user === null
+                ? "Aucun compte n’est nécessaire pour commencer."
+                : `${user.email ?? "Compte Studymeal"} · Toucher pour se déconnecter.`}
             </Text>
           </View>
-        </View>
+        </Pressable>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryEyebrow}>TES REPÈRES</Text>
@@ -167,6 +198,28 @@ export default function ProfileScreen() {
               <Text style={styles.preferenceAction}>Modifier</Text>
             </View>
           </Pressable>
+          {Platform.OS === "ios" ? (
+            <Pressable
+              accessibilityLabel="Choisir l’application de navigation"
+              accessibilityRole="button"
+              onPress={() => setIsNavigationAppPickerVisible(true)}
+              style={[styles.preferenceRow, styles.preferenceRowBorder]}
+            >
+              <View style={styles.preferenceRowContent}>
+                <View style={styles.preferenceCopy}>
+                  <Text style={styles.preferenceLabel}>Navigation</Text>
+                  <Text style={styles.preferenceValue}>
+                    {selectedNavigationApp === null
+                      ? "À choisir au premier itinéraire"
+                      : navigationAppLabels[selectedNavigationApp]}
+                  </Text>
+                </View>
+                <Text style={styles.preferenceAction}>
+                  {selectedNavigationApp === null ? "Choisir" : "Modifier"}
+                </Text>
+              </View>
+            </Pressable>
+          ) : null}
           <Pressable
             accessibilityLabel="Choisir les catégories préférées"
             accessibilityRole="button"
@@ -216,6 +269,63 @@ export default function ProfileScreen() {
           <Text style={styles.resetButtonText}>Réinitialiser mes préférences</Text>
         </Pressable>
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setIsNavigationAppPickerVisible(false)}
+        transparent
+        visible={isNavigationAppPickerVisible}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalEyebrow}>PRÉFÉRENCE LOCALE</Text>
+            <Text style={styles.modalTitle}>Navigation</Text>
+            <Text style={styles.modalDescription}>
+              Studymeal ouvrira cette application quand tu démarreras un itinéraire.
+            </Text>
+
+            <View style={styles.campusOptions}>
+              {(["apple-maps", "google-maps"] as const).map((app) => {
+                const isSelected = selectedNavigationApp === app;
+
+                return (
+                  <Pressable
+                    key={app}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: isSelected }}
+                    onPress={() => {
+                      setNavigationApp(app);
+                      setIsNavigationAppPickerVisible(false);
+                    }}
+                    style={[
+                      styles.campusOption,
+                      isSelected ? styles.campusOptionSelected : null,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.campusOptionText,
+                        isSelected ? styles.campusOptionTextSelected : null,
+                      ]}
+                    >
+                      {isSelected ? "✓ " : ""}
+                      {navigationAppLabels[app]}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setIsNavigationAppPickerVisible(false)}
+              style={styles.cancelButton}
+            >
+              <Text style={styles.cancelButtonText}>Annuler</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         animationType="fade"
