@@ -6,6 +6,7 @@ import {
   TextInput,
   View,
   Alert,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Polyline, type MapMarker } from "react-native-maps";
@@ -26,6 +27,7 @@ import {
 import { PlaceDetails } from "../../components/places/PlaceDetails";
 import { useFavorites } from "../../contexts/FavoritesContext";
 import { getRoute, type Route } from "../../services/directions/getRoute";
+import { openNavigation } from "../../services/directions/openNavigation";
 import {
   getUserLocation,
   type UserCoordinates,
@@ -80,6 +82,7 @@ type NonClusteredMarkerProps = ComponentProps<typeof Marker> & {
 const NonClusteredMarker = Marker as unknown as ComponentType<NonClusteredMarkerProps>;
 
 export default function FindScreen() {
+  const { selectedNavigationApp, setNavigationApp } = usePreferences();
 
   const { placeId } = useLocalSearchParams<{ placeId?: string }>();
 
@@ -387,6 +390,56 @@ export default function FindScreen() {
 
   const handleClearDirections = () => {
     setWalkingRoute(null);
+  };
+
+  const handleStartNavigation = async () => {
+    if (!selectedPlace || walkingRoute === null) {
+      return;
+    }
+
+    const openSelectedNavigationApp = async (
+      navigationApp: "apple-maps" | "google-maps" | undefined,
+    ) => {
+      const navigationResult = await openNavigation(
+        selectedPlace,
+        selectedRouteMode,
+        navigationApp,
+      );
+
+      if (navigationResult.status === "unavailable") {
+        Alert.alert(
+          "Navigation indisponible",
+          "Studymeal ne parvient pas à ouvrir l’application de cartographie choisie sur cet appareil.",
+        );
+      }
+    };
+
+    if (Platform.OS === "ios" && selectedNavigationApp === null) {
+      Alert.alert(
+        "Choisir une application de navigation",
+        "Ce choix sera mémorisé sur cet iPhone. Tu pourras le modifier dans Profil.",
+        [
+          { style: "cancel", text: "Annuler" },
+          {
+            onPress: () => {
+              setNavigationApp("apple-maps");
+              void openSelectedNavigationApp("apple-maps");
+            },
+            text: "Plans",
+          },
+          {
+            onPress: () => {
+              setNavigationApp("google-maps");
+              void openSelectedNavigationApp("google-maps");
+            },
+            text: "Google Maps",
+          },
+        ],
+      );
+      return;
+    }
+
+    await openSelectedNavigationApp(selectedNavigationApp ?? undefined);
   };
 
   const handleSelectRouteMode = (mode: RouteMode) => {
@@ -730,6 +783,7 @@ export default function FindScreen() {
               isRouteLoading={isRouteLoading}
               onRequestDirections={handleRequestDirections}
               onClearDirections={handleClearDirections}
+              onStartNavigation={handleStartNavigation}
               routeSummary={routeSummary}
               onSelectRouteMode={handleSelectRouteMode}
               selectedRouteMode={selectedRouteMode}

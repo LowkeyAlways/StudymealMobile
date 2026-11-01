@@ -2,7 +2,11 @@ import { Linking, Pressable, Text, View } from "react-native";
 import type { Place } from "../../data/places";
 import { styles } from "../../styles/components/place-details.styles";
 import { RouteModeSelector } from "../directions/RouteModeSelector";
-import { routeModeActionLabels, type RouteMode } from "../../types/directions";
+import {
+  routeModeActionLabels,
+  routeModeLabels,
+  type RouteMode,
+} from "../../types/directions";
 
 type PlaceDetailsProps = {
   isFavorite: boolean;
@@ -12,6 +16,7 @@ type PlaceDetailsProps = {
   onRequestDirections: () => void;
   routeSummary: string | null;
   onClearDirections: () => void;
+  onStartNavigation: () => void;
   onSelectRouteMode: (mode: RouteMode) => void;
   selectedRouteMode: RouteMode;
 };
@@ -50,6 +55,7 @@ export function PlaceDetails({
   onRequestDirections,
   routeSummary,
   onClearDirections,
+  onStartNavigation,
   onSelectRouteMode,
   selectedRouteMode,
 }: PlaceDetailsProps) {
@@ -85,16 +91,28 @@ export function PlaceDetails({
         selectedMode={selectedRouteMode}
       />
       {routeSummary ? (
-        <Pressable
-          accessibilityLabel={`Retirer l'itinéraire vers ${place.name}`}
-          accessibilityRole="button"
-          onPress={onClearDirections}
-          style={styles.clearDirectionsButton}
-        >
-          <Text style={styles.clearDirectionsButtonText}>
-            Retirer l’itinéraire
-          </Text>
-        </Pressable>
+        <>
+          <Pressable
+            accessibilityLabel={`Démarrer la navigation ${routeModeLabels[selectedRouteMode]} vers ${place.name}`}
+            accessibilityRole="button"
+            onPress={onStartNavigation}
+            style={styles.startNavigationButton}
+          >
+            <Text style={styles.startNavigationButtonText}>
+              Démarrer la navigation
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel={`Retirer l'itinéraire vers ${place.name}`}
+            accessibilityRole="button"
+            onPress={onClearDirections}
+            style={styles.clearDirectionsButton}
+          >
+            <Text style={styles.clearDirectionsButtonText}>
+              Retirer l’itinéraire
+            </Text>
+          </Pressable>
+        </>
       ) : (
         <Pressable
           accessibilityLabel={`${routeModeActionLabels[selectedRouteMode]} vers ${place.name}`}

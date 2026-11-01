@@ -14,11 +14,13 @@ import {
   type Campus,
   type CategoryPreference,
 } from "../types/preferences";
+import type { NavigationApp } from "../types/navigation";
 
 const CAMPUS_STORAGE_KEY = "@studymeal/campus";
 const BUDGET_STORAGE_KEY = "@studymeal/budget";
 const CATEGORIES_STORAGE_KEY = "@studymeal/categories";
 const NOTIFICATIONS_STORAGE_KEY = "@studymeal/notifications-enabled";
+const NAVIGATION_APP_STORAGE_KEY = "@studymeal/navigation-app";
 
 type PreferencesContextValue = {
   isPreferencesLoading: boolean;
@@ -26,10 +28,12 @@ type PreferencesContextValue = {
   selectedCampus: Campus | null;
   selectedCategories: CategoryPreference[];
   notificationsEnabled: boolean;
+  selectedNavigationApp: NavigationApp | null;
   setBudget: (budget: BudgetPreference) => void;
   setCampus: (campus: Campus) => void;
   setCategories: (categories: CategoryPreference[]) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
+  setNavigationApp: (app: NavigationApp) => void;
   resetPreferences: () => void;
 };
 
@@ -44,6 +48,8 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
   >(categoryOptions.map((option) => option.value));
   const [notificationsEnabled, setNotificationsEnabledState] =
     useState(false);
+  const [selectedNavigationApp, setSelectedNavigationApp] =
+    useState<NavigationApp | null>(null);
   const [isPreferencesLoading, setIsPreferencesLoading] = useState(true);
 
   useEffect(() => {
@@ -51,12 +57,13 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
 
     const restorePreferences = async () => {
       try {
-        const [storedCampus, storedBudget, storedCategories, storedNotifications] =
+        const [storedCampus, storedBudget, storedCategories, storedNotifications, storedNavigationApp] =
           await Promise.all([
             AsyncStorage.getItem(CAMPUS_STORAGE_KEY),
             AsyncStorage.getItem(BUDGET_STORAGE_KEY),
             AsyncStorage.getItem(CATEGORIES_STORAGE_KEY),
             AsyncStorage.getItem(NOTIFICATIONS_STORAGE_KEY),
+            AsyncStorage.getItem(NAVIGATION_APP_STORAGE_KEY),
           ]);
 
         if (
@@ -85,6 +92,14 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
 
         if (isMounted && storedNotifications !== null) {
           setNotificationsEnabledState(storedNotifications === "true");
+        }
+
+        if (
+          isMounted &&
+          (storedNavigationApp === "apple-maps" ||
+            storedNavigationApp === "google-maps")
+        ) {
+          setSelectedNavigationApp(storedNavigationApp);
         }
       } catch {
         // Le stockage indisponible ne doit pas bloquer l’application.
@@ -155,6 +170,18 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     );
   };
 
+  const setNavigationApp = (app: NavigationApp) => {
+    if (isPreferencesLoading) {
+      return;
+    }
+
+    setSelectedNavigationApp(app);
+
+    void AsyncStorage.setItem(NAVIGATION_APP_STORAGE_KEY, app).catch(() => {
+      // L’état en mémoire reste utilisable même si le stockage échoue.
+    });
+  };
+
   const resetPreferences = () => {
     if (isPreferencesLoading) {
       return;
@@ -164,12 +191,14 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     setSelectedBudget("all");
     setSelectedCategories(categoryOptions.map((option) => option.value));
     setNotificationsEnabledState(false);
+    setSelectedNavigationApp(null);
 
     void AsyncStorage.multiRemove([
       CAMPUS_STORAGE_KEY,
       BUDGET_STORAGE_KEY,
       CATEGORIES_STORAGE_KEY,
       NOTIFICATIONS_STORAGE_KEY,
+      NAVIGATION_APP_STORAGE_KEY,
     ]).catch(() => {
       // L’état en mémoire revient bien aux valeurs par défaut même si l’effacement échoue.
     });
@@ -183,10 +212,12 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
         selectedCampus,
         selectedCategories,
         notificationsEnabled,
+        selectedNavigationApp,
         setBudget,
         setCampus,
         setCategories,
         setNotificationsEnabled,
+        setNavigationApp,
         resetPreferences,
       }}
     >

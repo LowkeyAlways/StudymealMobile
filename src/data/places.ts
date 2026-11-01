@@ -423,8 +423,8 @@ export const places: Place[] = [
     priceLabel: "Tarif CROUS",
     budgetAmount: 1,
     address: "65 rue des Grands Moulins, 75013 Paris",
-    latitude: 48.8272,
-    longitude: 2.382,
+    latitude: 48.82738,
+    longitude: 2.375999,
     description:
       "Cafétéria proposant du snacking, des boissons et des micro-ondes en accès libre.",
     openingHours: "Du lundi au vendredi, de 8h à 20h.",

@@ -74,6 +74,19 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "800",
   },
+  startNavigationButton: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.brand,
+    borderRadius: 999,
+    marginTop: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  startNavigationButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: "800",
+  },
   routeSummary: {
     color: colors.brand,
     fontSize: 15,
