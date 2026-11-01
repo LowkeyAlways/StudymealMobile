@@ -2,6 +2,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 import type { Place } from "../../data/places";
 import { styles } from "../../styles/components/place-details.styles";
 import { RouteModeSelector } from "../directions/RouteModeSelector";
+import { CrowdReportPanel } from "../crowd/CrowdReportPanel";
 import {
   routeModeActionLabels,
   routeModeLabels,
@@ -134,6 +135,7 @@ export function PlaceDetails({
       {routeSummary ? (
         <Text style={styles.routeSummary}>{routeSummary}</Text>
       ) : null}
+      <CrowdReportPanel placeId={place.id} placeName={place.name} />
       <Text style={styles.sectionLabel}>À PROPOS</Text>
       <Text style={styles.description}>{place.description}</Text>
 
