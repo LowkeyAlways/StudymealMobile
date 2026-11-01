@@ -293,7 +293,7 @@ export default function AuthScreen() {
             <Text style={styles.switchModeText}>
               {isRegistering
                 ? "J’ai déjà un compte"
-                : "Créer un compte avec mon e-mail"}
+                : "Créer un compte"}
             </Text>
           </Pressable>
         </View>
