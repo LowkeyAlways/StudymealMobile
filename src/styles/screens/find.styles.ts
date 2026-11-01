@@ -221,10 +221,16 @@ export const styles = StyleSheet.create({
   filterChipTextSelected: {
     color: colors.white,
   },
-  markerCallout: {
+  markerLabel: {
+    alignItems: "center",
+    width: 230,
+  },
+  markerLabelBubble: {
     backgroundColor: colors.white,
     borderRadius: 14,
     elevation: 4,
+    maxWidth: 230,
+    minWidth: 180,
     paddingHorizontal: 12,
     paddingVertical: 8,
     shadowColor: '#000000',
@@ -235,10 +241,26 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.16,
     shadowRadius: 8,
   },
-  markerCalloutText: {
+  markerLabelArrow: {
+    backgroundColor: colors.white,
+    height: 16,
+    marginTop: -8,
+    transform: [{ rotate: "45deg" }],
+    width: 16,
+  },
+  markerLabelSpacer: {
+    height: 186,
+  },
+  markerLabelText: {
     color: colors.text,
     fontSize: 14,
     fontWeight: '800',
+    textAlign: "center",
+  },
+  hiddenMarkerCallout: {
+    height: 1,
+    opacity: 0,
+    width: 1,
   },
   emptyCategoryState: {
     backgroundColor: colors.goldSoft,

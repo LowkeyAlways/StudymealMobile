@@ -9,7 +9,12 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker, Polyline, type MapMarker } from "react-native-maps";
+import MapView, {
+  Callout,
+  Marker,
+  Polyline,
+  type MapMarker,
+} from "react-native-maps";
 import ClusteredMapView from "react-native-map-clustering";
 import { styles } from "../../styles/screens/find.styles";
 import { places, type Place, type PlaceCategory } from "../../data/places";
@@ -79,6 +84,13 @@ type NonClusteredMarkerProps = ComponentProps<typeof Marker> & {
   cluster: false;
 };
 
+type ClusterMarkerFeature = {
+  properties?: {
+    identifier?: string;
+    point_count?: number;
+  };
+};
+
 const NonClusteredMarker = Marker as unknown as ComponentType<NonClusteredMarkerProps>;
 
 export default function FindScreen() {
@@ -89,6 +101,9 @@ export default function FindScreen() {
   const router = useRouter();
 
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+
+  const [isSelectedMarkerVisible, setIsSelectedMarkerVisible] =
+    useState(false);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -130,6 +145,14 @@ export default function FindScreen() {
   const markerRefs = useRef<Record<string, MapMarker | null>>({});
 
   const ignoreMapPressRef = useRef(false);
+
+  const mapPressResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  const calloutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const activeSelectedPlaceIdRef = useRef<string | null>(null);
 
   const { favoritePlaceIds, toggleFavorite } = useFavorites();
   const {
@@ -230,20 +253,36 @@ export default function FindScreen() {
 
     if (selectedPlaceId !== null) {
       markerRefs.current[selectedPlaceId]?.hideCallout();
+      activeSelectedPlaceIdRef.current = null;
+      setIsSelectedMarkerVisible(false);
       setSelectedPlaceId(null);
     }
   };
 
   const selectPlace = useCallback((place: Place, sheetIndex = 1) => {
-    ignoreMapPressRef.current = true;
+    if (mapPressResetTimerRef.current !== null) {
+      clearTimeout(mapPressResetTimerRef.current);
+    }
 
-    setTimeout(() => {
+    ignoreMapPressRef.current = true;
+    mapPressResetTimerRef.current = setTimeout(() => {
       ignoreMapPressRef.current = false;
-    }, 100);
+      mapPressResetTimerRef.current = null;
+    }, 800);
+
+    if (calloutTimerRef.current !== null) {
+      clearTimeout(calloutTimerRef.current);
+    }
+
+    activeSelectedPlaceIdRef.current = place.id;
     setIsSearchActive(false);
     setWalkingRoute(null);
+    setIsSelectedMarkerVisible(false);
     setSelectedPlaceId(place.id);
-    bottomSheetRef.current?.snapToIndex(sheetIndex);
+
+    requestAnimationFrame(() => {
+      bottomSheetRef.current?.snapToIndex(sheetIndex);
+    });
 
     mapRef.current?.animateToRegion(
       {
@@ -254,8 +293,12 @@ export default function FindScreen() {
       },
       350,
     );
-    setTimeout(() => {
-      markerRefs.current[place.id]?.showCallout();
+    calloutTimerRef.current = setTimeout(() => {
+      if (activeSelectedPlaceIdRef.current === place.id) {
+        markerRefs.current[place.id]?.showCallout();
+        setIsSelectedMarkerVisible(true);
+      }
+      calloutTimerRef.current = null;
     }, 400);
   }, []);
 
@@ -487,11 +530,63 @@ export default function FindScreen() {
         ref={mapRef}
         initialRegion={parisRiveGaucheRegion}
         minPoints={2}
+        onMarkersChange={(markers) => {
+          if (selectedPlaceId === null) {
+            setIsSelectedMarkerVisible(false);
+            return;
+          }
+
+          const selectedMarkerIsVisible = (markers ?? []).some((marker) => {
+            const properties = (marker as unknown as ClusterMarkerFeature)
+              .properties;
+
+            return (
+              properties?.point_count === 0 &&
+              properties.identifier === selectedPlaceId
+            );
+          });
+
+          if (!selectedMarkerIsVisible) {
+            markerRefs.current[selectedPlaceId]?.hideCallout();
+            setIsSelectedMarkerVisible(false);
+            return;
+          }
+
+          if (!isSelectedMarkerVisible) {
+            if (calloutTimerRef.current !== null) {
+              clearTimeout(calloutTimerRef.current);
+            }
+
+            calloutTimerRef.current = setTimeout(() => {
+              if (activeSelectedPlaceIdRef.current === selectedPlaceId) {
+                markerRefs.current[selectedPlaceId]?.showCallout();
+                setIsSelectedMarkerVisible(true);
+              }
+
+              calloutTimerRef.current = null;
+            }, 80);
+          }
+        }}
+        onMarkerSelect={(event) => {
+          const markerId = event.nativeEvent.id;
+          const place = visibleMapPlaces.find((item) => item.id === markerId);
+
+          if (
+            place !== undefined &&
+            activeSelectedPlaceIdRef.current !== place.id
+          ) {
+            selectPlace(place);
+          }
+        }}
         radius={18}
         spiralEnabled
         spiderLineColor={colors.brand}
         style={styles.map}
-        onPress={() => {
+        onPress={(event) => {
+          if (event.nativeEvent.action === "marker-press") {
+            return;
+          }
+
           if (ignoreMapPressRef.current) {
             return;
           }
@@ -504,6 +599,8 @@ export default function FindScreen() {
             markerRefs.current[selectedPlaceId]?.hideCallout();
           }
 
+          activeSelectedPlaceIdRef.current = null;
+          setIsSelectedMarkerVisible(false);
           setSelectedPlaceId(null);
           bottomSheetRef.current?.snapToIndex(0);
           setWalkingRoute(null);
@@ -566,14 +663,37 @@ export default function FindScreen() {
                 latitude: place.latitude,
                 longitude: place.longitude,
               }}
-              title={place.name}
+              identifier={place.id}
               opacity={selectedPlaceId !== null && !isSelected ? 0.45 : 1}
               pinColor={markerColors[place.category]}
-              calloutOffset={{ x: 0, y: -37 }}
-              onPress={() => selectPlace(place)}
-            ></Marker>
+            >
+              <Callout tooltip>
+                <View pointerEvents="none" style={styles.hiddenMarkerCallout} />
+              </Callout>
+            </Marker>
           );
         })}
+        {selectedPlace && isSelectedMarkerVisible ? (
+          <NonClusteredMarker
+            anchor={{ x: 0.5, y: 1 }}
+            cluster={false}
+            coordinate={{
+              latitude: selectedPlace.latitude,
+              longitude: selectedPlace.longitude,
+            }}
+            zIndex={50}
+          >
+            <View collapsable={false} pointerEvents="none" style={styles.markerLabel}>
+              <View style={styles.markerLabelBubble}>
+                <Text numberOfLines={2} style={styles.markerLabelText}>
+                  {selectedPlace.name}
+                </Text>
+              </View>
+              <View style={styles.markerLabelArrow} />
+              <View style={styles.markerLabelSpacer} />
+            </View>
+          </NonClusteredMarker>
+        ) : null}
       </ClusteredMapView>
 
       <UserLocationButton
