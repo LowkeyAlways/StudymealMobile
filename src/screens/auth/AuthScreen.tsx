@@ -181,7 +181,17 @@ export default function AuthScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardView}
       >
-        <View style={styles.content}>
+        <View accessible={false} pointerEvents="none" style={styles.brandHeader}>
+          <View style={styles.brandMark}>
+            <Image
+              source={require("../../../assets/studymeal-mark.png")}
+              style={styles.brandLogo}
+            />
+          </View>
+          <Text style={styles.brandName}>Studymeal</Text>
+        </View>
+
+        <View style={[styles.content, isRegistering ? styles.registerContent : null]}>
           <Text style={styles.eyebrow}>TON COMPTE</Text>
           <Text style={styles.title}>
             {isRegistering ? "Créer ton compte" : "Bienvenue"}
