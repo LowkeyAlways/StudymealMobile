@@ -8,7 +8,7 @@ Construite avec **React Native**, **Expo**, **Expo Router** et **TypeScript**.
 
 - Carte interactive des lieux avec recherche, filtres, regroupement des marqueurs et détails d'un lieu.
 - Itinéraires à pied, à vélo et en voiture, calculés avec Mapbox Directions.
-- Ouverture d'une navigation guidée dans Plans ou Google Maps.
+- Navigation guidée interne (en cours).
 - Position de l'utilisateur et recentrage sur la carte.
 - Favoris sauvegardés localement et accessibles depuis le profil.
 - Préférences locales : campus, budget, catégories et notifications.
